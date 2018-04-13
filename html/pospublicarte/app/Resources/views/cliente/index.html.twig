@@ -1,0 +1,164 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    {% if clientes|length > 0 %}
+        {% for index in 1 .. clientes|length %}
+            {% set cliente = clientes[index-1] %}
+
+            {% set deleteForm = deleteForms[index-1] %}
+            {% set frmNombre = 'frmDelete' ~ cliente.id %}
+            {{ form_start(deleteForm, {'attr': {'id': frmNombre }} ) }}{{ form_end(deleteForm) }}
+
+        {% endfor %}
+    {% endif %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('cliente_new') }}'">
+                Nuevo
+            </button>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            <div id="jsGrid"></div>
+            <br>
+            <div>(<i class="material-icons">edit</i>) Editar &emsp; (<i class="material-icons">delete</i>) Borrar &emsp; (<i class="material-icons">person</i>) Contactos</div>
+            <script>
+                var items = [
+                    {% if clientes|length > 0 %}
+                    {% for index in 1 .. clientes|length %}
+                    {% set cliente = clientes[index-1] %}
+                    {% set frmNombreDelete = 'frmDelete' ~ cliente.id %}
+                    {
+                        "Id": {{ cliente.id }},
+                        "Empresa": "{{ cliente.razonsocial }}",
+                        "RFC": "{{ cliente.rfc }}",
+                        "Activo": "{{ cliente.activo }}",
+                        "Operaciones": "<a href=\"{{ path('cliente_edit', { 'id': cliente.id }) }}\"><i class=\"material-icons\">edit</i></a><span></span>{% if (is_granted('ROLE_EMPRESA')) %}<a href=\"#\" onclick=\"if (confirm('¿Está seguro de borrar este cliente?')) document.getElementById('{{ frmNombreDelete }}').submit();\"><i class=\"material-icons\">delete</i></a><span></span>{% endif %}<a href=\"{{ path('contacto_index', { 'idCliente': cliente.id }) }}\"><i class=\"material-icons\">person</i></a>"
+                    },
+                    {% endfor %}
+                    {% endif %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: true,
+
+                            pageIndex: 1,
+                            pageSize: 20,
+
+                            pagePrevText: "<",
+                            pageNextText: ">",
+                            pageFirstText: "Primera",
+                            pageLastText: "Última",
+                            pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                            noDataContent: "No se encontraron registros",
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            fields: [
+                                { name: "Id", title: "Id", type: "text", width: "1.5em", css: "textofila", filtering:false },
+                                { name: "Empresa",title: "Empresa", type: "text", width: "10em", css: "textofila"},
+                                { name: "RFC", title: "RFC", type: "text", width: "5em", css: "textofila" },
+                                { name: "Activo",title: "Activo", type: "checkbox", width: "3em", css: "textofila"},
+                                { name: "Operaciones", title: "Operaciones", type: "html", width: "4em", css: "textofila" },
+                                { type: "control", width: "2em",  editButton: false, deleteButton: false },
+                            ],
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Empresa != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Empresa.toUpperCase().indexOf(filter.Empresa.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.NombreContacto != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.NombreContacto.toUpperCase().indexOf(filter.NombreContacto.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.RFC != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.RFC.toUpperCase().indexOf(filter.RFC.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Correo != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Correo.toUpperCase().indexOf(filter.Correo.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Telefono != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Telefono.toUpperCase().indexOf(filter.Telefono.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Activo != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Activo == filter.Activo);
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}
+
+
+
+
+
+

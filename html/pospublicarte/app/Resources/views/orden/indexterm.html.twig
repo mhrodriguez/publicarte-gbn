@@ -1,0 +1,514 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div id="divBotones" class="mdl-grid">
+        {% if facturadas == true %}
+        <div class="mdl-cell mdl-cell--3-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path("orden_hnew", {}) }}'">
+                Nueva Factura Histórica
+            </button>
+        </div>
+        {% endif %}
+        <div class="mdl-cell mdl-cell--2-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.print();">
+                Imprimir
+            </button>
+        </div>
+    </div>
+
+    <div id="dialog-confirm" title="Imprimir">
+        <p>¿Desea imprimir la Orden de Trabajo con precios?</p>
+    </div>
+
+    <div id="dialog-confirm2" title="Imprimir">
+        <p>¿Desea descargar la Orden de Trabajo con precios?</p>
+    </div>
+
+    {% if ordenes|length > 0 %}
+        {% for index in 1 .. ordenes|length %}
+            {% set orden = ordenes[index-1] %}
+            {% if (is_granted('ROLE_EMPRESA')) %}
+
+                {% set clonarForm = clonarForms[index-1] %}
+                {% set frmClonarNombre = 'frmClonar' ~ orden.id %}
+                {{ form_start(clonarForm, {'attr': {'id': frmClonarNombre }} ) }}{{ form_end(clonarForm) }}
+
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <script>
+        function mostrarColumna(nombre, mostrar)
+        {
+            $("#jsGrid").jsGrid("fieldOption", nombre, "visible", mostrar);
+        }
+        (function() {
+
+            var beforePrint = function() {
+                mostrarColumna('Operaciones', false);
+                mostrarColumna('IdCotizacion', false);
+                mostrarColumna('Usuario', false);
+
+                $("#divBotones").hide();
+                $("#divAyuda").hide();
+            };
+
+            var afterPrint = function() {
+                mostrarColumna('Operaciones', true);
+                mostrarColumna('IdCotizacion', true);
+                mostrarColumna('Usuario', true);
+
+                $("#divBotones").show();
+                $("#divAyuda").show();
+            };
+
+            if (window.matchMedia) {
+                var mediaQueryList = window.matchMedia('print');
+                mediaQueryList.addListener(function(mql) {
+                    if (mql.matches) {
+                        beforePrint();
+                    } else {
+                        afterPrint();
+                    }
+                });
+            }
+
+            window.onbeforeprint = beforePrint;
+            window.onafterprint = afterPrint;
+
+        }());
+    </script>
+
+    <script>
+        var urlImprimir;
+        function imprimir(url)
+        {
+            urlImprimir = url;
+
+            $( "#dialog-confirm" ).dialog("open");
+        }
+
+        $( "#dialog-confirm" ).dialog({
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+                "Si": function() {
+                    window.open(urlImprimir + '?cp=1');
+                    $( this ).dialog( "close" );
+                },
+                "No": function() {
+                    window.open(urlImprimir);
+                    $( this ).dialog( "close" );
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        });
+
+        function pdf(url)
+        {
+            urlPdf = url;
+
+            $( "#dialog-confirm2" ).dialog("open");
+        }
+        $( "#dialog-confirm2" ).dialog({
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            buttons: {
+                "Si": function() {
+                    window.open(urlPdf + '?cp=1');
+                    $( this ).dialog( "close" );
+                },
+                "No": function() {
+                    window.open(urlPdf);
+                    $( this ).dialog( "close" );
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        });
+
+        $( function() {
+            $( "#dialog-url" ).dialog({
+                autoOpen: false,
+                resizable: false,
+                height: "auto",
+                width: 900,
+                modal: true,});
+        } );
+
+        function modal(url)
+        {
+            document.getElementById("frmUrl").src = url;
+            $( "#dialog-url" ).dialog("open");
+        }
+    </script>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <br>
+            <div id="divAyuda">(<i class="material-icons">edit</i>) Editar &emsp; (<i class="material-icons">get_app</i>) Descargar&emsp; (<i class="material-icons">print</i>) Imprimir&emsp; (<i class="material-icons">attach_money</i>) Pagos</div>
+
+            <script>
+                var items = [
+                    {% if ordenes|length > 0 %}
+                    {% for index in 1 .. ordenes|length %}
+                    {% set orden = ordenes[index-1] %}
+                    {% set frmNombreFacturar = 'frmFact' ~ orden.id %}
+                    {% set frmNombreCobrar = 'frmCobrar' ~ orden.id %}
+                    {% set frmNombreDelete = 'frmDelete' ~ orden.id %}
+                    {% set frmClonarNombre = 'frmClonar' ~ orden.id %}
+                    {
+                        "Id": {{ orden.id }},
+                        {% if (orden.cotizacion) %}
+                        "IdCotizacion": {{ orden.cotizacion.id }},
+                        {% endif %}
+                        "FolioFactura": "{{ orden.foliofactura  }}",
+                        "Tipo": {% if orden.tipo %} {{ orden.tipo.id }} {% else %} null {% endif %},
+                        "Maquina": {% if orden.maquina %} {{ orden.maquina.id }} {% else %} null {% endif %},
+                        "Usuario": {{ orden.usuario.id }},
+                        "Cliente": {% if orden.cliente %} {{ orden.cliente.id }} {% else %} null {% endif %} ,
+                        "Estado": {{ orden.estado.id }},
+                        "Fecha": new Date({{orden.fecha|date('Y')}}, {{orden.fecha|date('m')}}-1, {{orden.fecha|date('d')}}, 0, 0, 0, 0),
+                        "Total": "{{ orden.moneda.simbolo }} {{ orden.total | number_format(2, '.', ',') }}",
+                        "SaldoPagado": "{{ orden.moneda.simbolo }} {{ orden.saldopagado | number_format(2, '.', ',') }}",
+                        "SaldoRestante" : "{{ orden.moneda.simbolo }} {{ orden.saldopendiente | number_format(2, '.', ',') }}",
+                        "Operaciones": "<a href=\"#\" onclick=\"pdf('{{ path('orden_showpdf', { 'id': orden.id }) }}');\"><i class=\"material-icons\">get_app</i></a><span></span><a href=\"{{ path(pathedit, { 'id': orden.id }) }}\"><i class=\"material-icons\">edit</i></a><span></span><a href=\"{{ path('pago_index', { 'idOrden': orden.id }) }}\"><i class=\"material-icons\">attach_money</i></a><span></span><a \"#\" onclick=\"imprimir('{{ path('orden_showprint', { 'id': orden.id }) }}');\"><i class=\"material-icons\">print</i></a><span></span><a href=\"#\" onclick=\"modal('{{ path('orden_show', { 'id': orden.id }) }}');\"><i class=\"material-icons\">search</i></a><span></span><a href=\"#\" onclick=\"if (confirm('¿Está seguro de clonar esta orden?')) document.getElementById('{{ frmClonarNombre }}').submit();\"><i class=\"material-icons\">call_split</i></a>",
+                        "MontoR": {{ orden.total }},
+                        "MontoR2": {{ orden.saldopagado }},
+                        "MontoR3": {{ orden.saldopendiente }}
+                    },
+                    {% endfor %}
+                    {% endif %}
+                ];
+
+                var totales = {
+                    "Id": null,
+                    "FolioFactura": null,
+                    "Usuario": null,
+                    "Cliente": null,
+                    "Estado": null,
+                    "Fecha": null,
+                    "Total": "MXN 0.00",
+                    "SaldoPagado": null,
+                    "SaldoRestante" : null,
+                    "Operaciones": null,
+                    "MontoR": 0,
+                    "MontoR2": 0,
+                    "MontoR3": 0,
+                };
+                items.push(totales);
+
+                var MyDateField = function(config) {
+                    jsGrid.Field.call(this, config);
+                };
+                MyDateField.prototype = new jsGrid.Field({
+                    sorter: function(date1, date2) {
+                        return new Date(date1) - new Date(date2);
+                    },
+                    itemTemplate: function(value) {
+
+                        if (value == null) return '';
+
+                        var fecha = new Date(value);
+
+                        var dd = fecha.getDate();
+                        var mm = fecha.getMonth()+1;
+                        var yyyy = fecha.getFullYear();
+                        if(dd<10){dd='0'+dd}
+                        if(mm<10){mm='0'+mm}
+
+                        return '' + dd + '-' + mm + '-' + yyyy;
+                    },
+                    filterTemplate: function() {
+                        var now = new Date();
+                        this._Picker = $("<input>").datepicker({ defaultDate: now.setFullYear(now.getFullYear() - 1), dateFormat: "dd-mm-yy", onSelect: function(dateText) {
+                            $("#jsGrid").jsGrid("search");
+                        } });
+                        return $("<div>").append(this._Picker);
+                    },
+                    filterValue: function() {
+                        return this._Picker.datepicker("getDate");
+                    },
+                });
+                jsGrid.fields.myDateField = MyDateField;
+
+                $("#jsGrid").jsGrid({
+                            width: "140%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            noDataContent: "No se encontraron registros",
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Id", title: "Folio", type: "text", width: "1.5em", css: "textofila" },
+
+                                { name: "Operaciones", title: "Operaciones", type: "html", width: "4.5em", css: "textofila", filtering:false },
+
+                                { name: "IdCotizacion", title: "Folio de Cotización", type: "text", width: "3em", css: "textofila" },
+
+                                { name: "FolioFactura", title: "Folio de Facturación", type: "text", width: "3.5em", css: "textofila" },
+
+                                { name: "Tipo", title: "Tipo de Servicio", type: "select", width: "4.5em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for tipo in tipos %}
+                                        {
+                                            "Id": {{ tipo.id }},
+                                            "Nombre": "{{ tipo.nombre }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+
+                                { name: "Maquina", title: "Maquina", type: "select", width: "4.5em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for maquina in maquinas %}
+                                        {
+                                            "Id": {{ maquina.id }},
+                                            "Nombre": "{{ maquina.nombre }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+
+                                { name: "Usuario", title: "Usuario", type: "select", width: "6em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for usuario in usuarios %}
+                                        {
+                                            "Id": {{ usuario.id }},
+                                            "Nombre": "{{ usuario.nombre }} {{ usuario.apellidos }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+
+                                { name: "Cliente", title: "Cliente", type: "select", width: "6em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for cliente in clientes %}
+                                        {
+                                            "Id": {{ cliente.id }},
+                                            "Nombre": "{{ cliente.razonsocial }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+
+                                { name: "Estado", title: "Estado", type: "select", width: "4em", css: "textofila",
+                                    items: [
+                                        {% for estado in estados %}
+                                        {
+                                            "Id": {{ estado.id }},
+                                            "Nombre": "{{ estado.nombre }}"
+                                        },
+                                        {% endfor %}
+                                        { "Id": -1, Nombre: "Todos" },
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre",
+                                },
+
+                                { name: "Fecha",title: "Fecha", type: "myDateField", width: "3em", css: "textofila"},
+                                { name: "Total",title: "Total", type: "text", width: "4.5em", css: "textofila", filtering:false},
+                                { name: "SaldoPagado",title: "Saldo Pagado", type: "text", width: "4.5em", css: "textofila", filtering:false},
+                                { name: "SaldoRestante",title: "Saldo Restante", type: "text", width: "4.5em", css: "textofila", filtering:false},
+                                { type: "control", width: "2em",  editButton: false, deleteButton: false },
+                            ],
+
+                            onRefreshing: function(args) {
+                                var data = args.grid.option("data");
+                                var totalR= 0, totalR2= 0, totalR3=0;
+
+                                for (var i = 0, len = data.length; i < len; i++) {
+                                    totalR += data[i].MontoR;
+                                    totalR2 += data[i].MontoR2;
+                                    totalR3 += data[i].MontoR3;
+                                }
+                                totales.Total = "MXN " + totalR.toFixed(2);
+                                totales.SaldoPagado = "MXN " + totalR2.toFixed(2);
+                                totales.SaldoRestante = "MXN " + totalR3.toFixed(2);
+                            },
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Id > 0) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            return (item.Id == filter.Id);
+                                        });
+                                    }
+
+                                    if (filter.IdCotizacion > 0) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            return (item.IdCotizacion == filter.IdCotizacion);
+                                        });
+                                    }
+
+                                    if (filter.FolioFactura != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            return (item.FolioFactura.toUpperCase().indexOf(filter.FolioFactura.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Fecha != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+                                            return (item.Fecha.valueOf() == filter.Fecha.valueOf());
+                                        });
+                                    }
+
+                                    if (filter.Usuario != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            if (filter.Usuario>0) {
+                                                return (item.Usuario == filter.Usuario);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Tipo != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            if (filter.Tipo>0) {
+                                                return (item.Tipo == filter.Tipo);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Maquina != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            if (filter.Maquina>0) {
+                                                return (item.Maquina == filter.Maquina);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Cliente != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            if (filter.Cliente>0) {
+                                                return (item.Cliente == filter.Cliente);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Estado != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (item.Id == null) return true;
+
+                                            if (filter.Estado>0) {
+                                                return (item.Estado == filter.Estado);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+                $("#jsGrid").jsGrid("loadData", { Estado: 10 }).done(function() {
+                    console.log("data loaded");
+                });
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <div id="dialog-url" title="Items">
+        <iframe id="frmUrl" style="height:30em;"></iframe>
+    </div>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

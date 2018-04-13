@@ -1,0 +1,739 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div id="dialog-confirm" title="Orden Terminada">
+        <p>Seleccione el tipo de Orden</p>
+    </div>
+
+    <div id="detailsDialog" title="Servicio">
+        <form id="detailsForm">
+            <fieldset>
+                <label>Servicio</label>
+                <br>
+                    <select id="selProducto" style="width: 27em;">
+                        <option value="0">Ninguno</option>
+                        {% for producto in productos  %}
+                            <option id="optProducto{{ producto.id }}" value="{{ producto.id }}" pu="{{ producto.precio }}">{{ producto.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                <br>
+                <br>
+                <label>Descripción</label>
+                <textarea name="txtConcepto" id="txtConcepto" value="" rows="4" cols="100" class="text ui-widget-content ui-corner-all"></textarea>
+                <br>
+                <label for="txtCodigo">Código</label>
+                <input type="text" name="txtCodigo" id="txtCodigo" value="" class="text ui-widget-content ui-corner-all">
+                <br>
+                <label for="txtTinta">Tinta</label>
+                <input type="text" name="txtTinta" id="txtTinta" value="" class="text ui-widget-content ui-corner-all">
+                <br>
+                <label for="txtPrecio">Precio Unitario</label>
+                <input type="text" name="txtPrecio" id="txtPrecio" value="" class="text ui-widget-content ui-corner-all">
+                <br>
+                <label for="txtCantidad">Cantidad</label>
+                <input type="text" name="txtCantidad" id="txtCantidad" value="" class="text ui-widget-content ui-corner-all">
+
+                <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                <!--input type="submit" tabindex="-1" style="position:absolute; top:-1000px"-->
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+            <h4>Orden {{ orden.id }}</h4>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'return datasubmit();', 'id': 'appbundle_orden'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-label">
+                        {{ edit_form.estado.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.estado) }}
+                    </div>
+                    {{ form_errors(edit_form.estado) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-label">
+                        {{ edit_form.cliente.vars.label }}
+                    </label>
+                    {{ form_widget(edit_form.cliente) }}
+                    {{ form_errors(edit_form.cliente) }}
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-label">
+                        {{ edit_form.contacto.vars.label }}
+                    </label>
+                    {{ form_widget(edit_form.contacto) }}
+                    {{ form_errors(edit_form.contacto) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--3-col">
+                    <label class="mdl-label">
+                        {{ edit_form.tipo.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.tipo) }}
+                    </div>
+                    {{ form_errors(edit_form.tipo) }}
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <label class="mdl-label">
+                        {{ edit_form.metodopago.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.metodopago) }}
+                    </div>
+                    {{ form_errors(edit_form.metodopago) }}
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <label class="mdl-label">
+                        {{ edit_form.mediopago.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.mediopago) }}
+                    </div>
+                    {{ form_errors(edit_form.mediopago) }}
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <label class="mdl-label">
+                        {{ edit_form.usocfdi.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.usocfdi) }}
+                    </div>
+                    {{ form_errors(edit_form.usocfdi) }}
+                </div>
+            </div>
+
+            <div id="divMaquina" class="mdl-grid">
+                <div class="mdl-cell mdl-cell--3-col">
+                    <label class="mdl-label">
+                        {{ edit_form.maquina.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.maquina) }}
+                    </div>
+                    {{ form_errors(edit_form.maquina) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div id="jsGrid"></div>
+                    <script>
+                        var items = [
+                            {% for item in orden.items %}
+                            {
+                                "Estado": "",
+                                "Id":{{ item.id }},
+                                "IdProducto":{% if item.producto %}{{ item.producto.id }}{% else %}0{% endif %},
+                                "Concepto":"{{ item.descripcion | replace({"\n": " "}) }}",
+                                "Codigo":"{{ item.codigo }}",
+                                "Tinta":"{{ item.tinta }}",
+                                "Cantidad":{{ item.cantidad }},
+                                "Precio":{{ item.precio }},
+                                "Subtotal":{{ item.cantidad * item.precio }}
+                            },
+                            {% endfor %}
+                        ];
+
+                        var itemsaux = [];
+                        var itemsauxborrados = [];
+
+                        $(function() {
+                            var formSubmitHandler = $.noop;
+
+                            var showDetailsDialog = function(operacion, concepto) {
+
+                                if (operacion === "Add")
+                                {
+                                    $("#txtPrecio").val( $('#selProducto').find(":selected").attr('pu') );
+                                    $("#selProducto" ).prop( "disabled", false );
+                                    $("#selProducto" ).val(0);
+                                    $('#selProducto').trigger('change');
+                                }
+                                else
+                                {
+                                    $("#selProducto").prop( "disabled", true );
+                                    $("#selProducto" ).val(concepto.IdProducto);
+                                    $('#selProducto').trigger('change');
+                                }
+
+                                $("#txtConcepto").val(concepto.Concepto);
+                                $("#txtPrecio").val( concepto.Precio );
+                                $("#txtCantidad").val(concepto.Cantidad);
+                                $("#txtCodigo").val(concepto.Codigo);
+                                $("#txtTinta").val(concepto.Tinta);
+
+                                formSubmitHandler = function() {
+                                    saveConcepto(concepto, operacion === "Add");
+                                };
+
+                                $( "#detailsDialog" ).dialog("open");
+                            };
+
+                            var saveConcepto = function(concepto, isNew) {
+
+                                var cantidad = parseInt($("#txtCantidad").val(), 10)
+                                var precio = parseFloat($("#txtPrecio").val());
+                                var estado = "N";
+
+                                if (!isNew) // Si fue edición de registro
+                                {
+                                    if (concepto.Estado != "N")
+                                    {
+                                        estado = "A";
+                                    }
+                                }
+
+                                $.extend(concepto, {
+                                    Estado: estado,
+                                    IdProducto: parseInt($("#selProducto").val()),
+                                    Concepto: $("#txtConcepto").val(),
+                                    Codigo: $("#txtCodigo").val(),
+                                    Tinta: $("#txtTinta").val(),
+                                    Cantidad: cantidad,
+                                    Precio: precio,
+                                    Subtotal: cantidad*precio
+                                });
+
+                                $("#jsGrid").jsGrid(isNew ? "insertItem" : "updateItem", concepto);
+
+                                calcularTotales();
+                            };
+
+                            $("#jsGrid").jsGrid({
+                                height: "auto",
+                                width: "100%",
+                                editing: true,
+                                autoload: true,
+                                paging: true,
+                                noDataContent: "",
+                                rowClick: function(args) {
+                                    showDetailsDialog("Edit", args.item);
+                                },
+                                controller: items,
+                                data: items,
+
+                                deleteConfirm: function(item) {
+                                    return "¿Está seguro de quitar este elemento?"
+                                },
+                                onItemDeleted: function(args) {
+                                    if (args.item.Estado != "N")
+                                    {
+                                        itemsauxborrados.push(args.item);
+                                    }
+                                    calcularTotales();
+                                },
+
+                                fields: [
+                                    {
+                                        type: "control",
+                                        modeSwitchButton: false,
+                                        editButton: false,
+                                        headerTemplate: function() {
+                                            return $("<button>").attr("type", "button").text("+")
+                                                    .on("click", function () {
+                                                        showDetailsDialog("Add", {});
+                                                        return false;
+                                                    });
+                                        }
+                                    },
+
+                                    { name: "IdProducto", title: "Servicio", type: "select", width: "9em", css: "textofila",
+                                        items: [
+                                            {% for producto in productos %}
+                                            {
+                                                "Id": {{ producto.id }},
+                                                "Nombre": "{{ producto.nombre }}"
+                                            },
+                                            {% endfor %}
+                                        ],
+                                        valueField: "Id",
+                                        textField: "Nombre"
+                                    },
+                                    { name: "Concepto", title: "Descripción", type: "text", width: "6em", css: "textofila" },
+                                    { name: "Codigo", title: "Código", type: "text", width: "6em", css: "textofila" },
+                                    { name: "Tinta", title: "Tinta", type: "text", width: "6em", css: "textofila" },
+                                    { name: "Precio", type: "number", width: "4em", css: "textofila", itemTemplate: function(value) {
+                                        return "$ " + value.toFixed(2); } },
+                                    { name: "Cantidad", type: "number", width: "3em", css: "textofila" },
+                                    { name: "Subtotal", type: "number", width: "6em", css: "textofila", itemTemplate: function(value) {
+                                        return "$ " + value.toFixed(2); } },
+                                ]
+                            });
+                            calcularTotales();
+
+                            $("#detailsDialog").dialog({
+                                autoOpen: false,
+                                width: 400,
+                                close: function() {
+                                },
+                                buttons: {
+                                    "Guardar": addConcepto,
+                                    "Cancelar": function() {
+                                        $("#detailsDialog").dialog( "close" );
+                                    }
+                                }
+                            });
+
+                            function validarForm()
+                            {
+                                if (!checkRegexp($("#txtCantidad"), /^[1-9][0-9]*$/i ))
+                                {
+                                    alert("Cantidad inválida");
+                                    return false;
+                                }
+
+                                var precio = $("#txtPrecio").val();
+                                if  (precio.charAt(0) == '.') { $("#txtPrecio").val("0" + precio); }
+                                if (!checkRegexp($("#txtPrecio"), /^(\d+)(\.\d{1,2})?$/i ))
+                                {
+                                    alert("Precio inválido");
+                                    return false;
+                                }
+
+                                if (!checkRegexp($("#txtConcepto"), /^\w+/i) && $("#selProducto").val() == 0)
+                                {
+                                    alert("Seleccione un servicio o escriba su descripción.");
+                                    return false;
+                                }
+
+                                return true;
+                            }
+
+                            function addConcepto() {
+                                var valid = validarForm();
+                                if ( valid ) {
+                                    formSubmitHandler();
+                                    $("#detailsDialog").dialog( "close" );
+                                }
+                                return valid;
+                            }
+
+                            function checkRegexp(o, regexp, n) {
+                                if ( !( regexp.test( o.val() ) ) ) {
+                                    return false;
+                                } else {
+                                    return true;
+                                }
+                            }
+
+                            function calcularTotales()
+                            {
+                                var subtotal=0, iva=0, total=0;
+                                var data = $("#jsGrid").jsGrid("option", "data");
+
+                                for (var i = 0, len = data.length; i < len; i++) {
+                                    subtotal += data[i].Subtotal;
+                                }
+                                iva = subtotal*0.16;
+                                total = subtotal + iva;
+
+                                $("#lblSubtotal").html(" $ " + subtotal.toFixed(2));
+
+                                $("#lblIVA").html("  $ " + iva.toFixed(2));
+                                $("#lblTotal").html("$ " + total.toFixed(2));
+                            }
+                        });
+
+                    </script>
+                    <style>
+                        .textofila
+                        {
+                            font-size:0.8em;
+                        }
+                    </style>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-cell--12-col">
+                        <label for="appbundle_orden_fechaentrega">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ edit_form.fechaentrega.vars.label }}
+                        </label>
+                        <i class="material-icons" style="vertical-align: middle;">insert_invitation</i>
+                        {{ form_widget(edit_form.fechaentrega) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <b><label>Subtotal</label></b><br>
+                    <b><label>IVA</label></b><br>
+                    <b><label>Total</label></b>
+                </div>
+                <div class="mdl-cell mdl-cell--2-col">
+                    <label id="lblSubtotal">$ 0.00</label><br>
+                    <label id="lblIVA">$ 0.00</label><br>
+                    <label id="lblTotal">$ 0.00</label>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <h5>Acabado del Trabajo</h5>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.block) }}
+                        {{ form_label(edit_form.block) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.medidaimpresion) }}
+                        {{ form_label(edit_form.medidaimpresion) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.papel) }}
+                        {{ form_label(edit_form.papel) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.folio) }}
+                        {{ form_label(edit_form.folio) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <h5>Observaciones</h5>
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-cell--12-col">
+                        {{ form_widget(edit_form.observaciones, {'attr': {'rows': '4'}}) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <h5>
+                        {{ edit_form.impresionopciones.vars.label }}
+                    </h5>
+                    <div>
+                        {{ form_widget(edit_form.impresionopciones) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.colorinicial) }}
+                        {{ form_label(edit_form.colorinicial) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.colorcfb) }}
+                        {{ form_label(edit_form.colorcfb) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.colorcf) }}
+                        {{ form_label(edit_form.colorcf) }}
+                    </div>
+                </div>
+            </div>
+
+            {{ form_widget(edit_form.itemsaux) }}
+            {{ form_widget(edit_form.especial) }}
+            {{ form_widget(edit_form.foliofactura) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Guardar</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="javascript:history.back()" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+            {{ form_end(edit_form) }}
+
+            <div>
+                {{ form_errors(edit_form.fechaentrega) }}
+                {{ form_errors(edit_form) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+
+        $('#appbundle_orden_impresionopciones input').removeClass('mdl-textfield__input');
+        $('#appbundle_orden_impresionopciones label').removeClass('mdl-textfield__label');
+        $('#lblImpresionOpciones').removeClass('mdl-textfield__label');
+
+        var selectCliente = $("#appbundle_orden_cliente");
+        var selectContactos = $("#appbundle_orden_contacto");
+        var selectMetodopago = $("#appbundle_orden_metodopago");
+        var selectMediopagos = $("#appbundle_orden_mediopago");
+        var selectTipo = $("#appbundle_orden_tipo");
+
+        $( "#appbundle_orden_cliente" ).change(function() {
+
+            var indexCliente = selectCliente.val();
+
+            selectContactos.empty(); // remove old options
+            selectContactos.append($("<option></option>").attr("value", "").text(""));
+
+            if (indexCliente >= 0 && indexCliente != "") {
+                mostrarProgreso(true);
+
+                var url = 'http://' + window.location.hostname + '{{ path('contacto_index', {'idCliente':1000}) }}.json';
+                url = url.replace('1000', indexCliente);
+
+                $.ajax({
+                    url: url, dataType: "json",
+                    success: function (data) {
+
+                        var index=0;
+                        $.each(data, function (key, value) {
+                            selectContactos.append($("<option></option>")
+                                    .attr("value", data[index].id).text(data[index].nombre + " " + data[index].apellidos));
+                            index++;
+                        });
+
+                        mostrarProgreso(false);
+
+                        selectContactos.val(-1);
+                    }
+                });
+            }
+        });
+
+        $( "#appbundle_orden_metodopago" ).change(function() {
+
+            var indexMetodopago = selectMetodopago.val();
+
+            selectMediopagos.empty(); // remove old options
+            selectMediopagos.append($("<option></option>").attr("value", "").text(""));
+
+            if (indexMetodopago >= 0 && indexMetodopago != "") {
+                mostrarProgreso(true);
+
+                var url = 'http://' + window.location.hostname + '{{ path('mediopago_index', {'idMetodoPago':1000}) }}.json';
+                url = url.replace('1000', indexMetodopago);
+
+                $.ajax({
+                    url: url, dataType: "json",
+                    success: function (data) {
+
+                        var index=0;
+                        $.each(data, function (key, value) {
+                            selectMediopagos.append($("<option></option>")
+                                    .attr("value", data[index].id).text(data[index].nombre));
+                            index++;
+                        });
+
+                        mostrarProgreso(false);
+
+                        selectMediopagos.val(-1);
+                    }
+                });
+            }
+        });
+
+        $("#selProducto" ).change(function() {
+            var precio = $('#selProducto').find(":selected").attr('pu');
+            $("#txtPrecio").val(precio);
+        });
+
+        $( "#appbundle_orden_tipo" ).change(function() {
+            maquina();
+        });
+
+        $( function() {
+            prepararCalendario($( "#appbundle_orden_fechaentrega" ));
+
+            $('#appbundle_orden_cliente').select2();
+            $('#appbundle_orden_contacto').select2();
+            $('#selProducto').select2();
+
+            $('#appbundle_orden_especial').hide();
+            $('#appbundle_orden_foliofactura').hide();
+
+            $( "#dialog-confirm" ).dialog({
+                autoOpen: false,
+                resizable: false,
+                height: "auto",
+                width: 400,
+                modal: true,
+                buttons: {
+                    "Facturada": function() {
+
+                        var folio = prompt("Ingrese el Folio de la Factura", "");
+                        if (folio == null)
+                        {
+                            return false;
+                        }
+                        if (folio == "")
+                        {
+                            alert("Folio inválido.");
+                            return false;
+                        }
+
+                        $("#appbundle_orden_foliofactura").val(folio);
+                        $("#appbundle_orden_especial").prop('checked', false);
+                        datasubmit2();
+                    },
+                    "Especial": function() {
+                        $("#appbundle_orden_especial").prop('checked', true);
+                        datasubmit2();
+                    },
+                    Cancel: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+
+            $(document).ready(function(){
+                $("<h6>Intercalado</h6>").insertBefore("#appbundle_orden_impresionopciones_10");
+                $("<h6>Acabados</h6>").insertBefore("#appbundle_orden_impresionopciones_1");
+                $("<br/>").insertBefore("#appbundle_orden_impresionopciones_11");
+                $("<br/>").insertBefore("#appbundle_orden_impresionopciones_14");
+            });
+
+            maquina();
+        } );
+    </script>
+
+    <script>
+        var cancelSubmit=false;
+
+        function maquina()
+        {
+            var indexTipo = selectTipo.val();
+            if (indexTipo == 2 || indexTipo == 4) // Rotulos o Offset
+            {
+                $("#divMaquina").show();
+                $("#appbundle_orden_maquina").prop('disabled', false);
+            }
+            else
+            {
+                $( "#divMaquina").hide();
+                $("#appbundle_orden_maquina").prop('disabled', true);
+            }
+        }
+
+        function datasubmit()
+        {
+            var idEstado = $("#appbundle_orden_estado").val();
+            if (idEstado == 9) // Si es Salida...
+            {
+                $("#dialog-confirm").dialog("open");
+            }
+            else
+            {
+                datasubmit2();
+            }
+
+            return false;
+        }
+
+        function datasubmit2()
+        {
+            if ($('#appbundle_orden_fechaentrega').val() == '')
+            {
+                alert('El campo fecha es obligatorio.');
+                return false;
+            }
+
+            var data = $("#jsGrid").jsGrid("option", "data");
+            if (data.length == 0) {
+                alert('No ha sido agregado ningún elemento.');
+                return ;
+            }
+            else
+            {
+                // 1. Actualizados
+                var itemsauxactualizados = [];
+                var itemsaux = [];
+
+                for (i = 0; i < data.length; i++) {
+                    var item = data[i];
+
+                    if (item.Estado == "A")
+                    {
+                        itemsauxactualizados.push(item);
+                    }
+                    else if (item.Estado == "N") // Nuevo
+                    {
+                        itemsaux.push(item);
+                    }
+                }
+
+                json = JSON.stringify(itemsauxactualizados);
+                $("#appbundle_orden_itemsauxactualizados").val(json);
+
+                json = JSON.stringify(itemsaux);
+                $("#appbundle_orden_itemsaux").val(json);
+
+                json = JSON.stringify(itemsauxborrados);
+                $("#appbundle_orden_itemsauxborrados").val(json);
+            }
+
+            mostrarProgreso(true);
+
+            document.getElementById('appbundle_orden').submit();
+        }
+
+        function prepararCalendario(control)
+        {
+            control.datepicker({
+                        defaultDate: new Date(),
+                        dateFormat: "dd/mm/yy",
+                        monthNames: [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+                    }
+            );
+        }
+    </script>
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+
+

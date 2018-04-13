@@ -1,0 +1,77 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('usuario_new') }}'">
+                Nuevo
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+    </div>
+
+    <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+        <thead>
+        <tr>
+            <th class="mdl-data-table__cell--non-numeric">Nombre de usuario</th>
+            <th class="mdl-data-table__cell--non-numeric">Nombre</th>
+            <th class="mdl-data-table__cell--non-numeric">Apellidos</th>
+            <th class="mdl-data-table__cell--non-numeric">E-mail</th>
+            <th class="mdl-data-table__cell--non-numeric">Roles</th>
+            <th class="mdl-data-table__cell--non-numeric">Sucursales</th>
+            <th class="mdl-data-table__cell--non-numeric">Activo</th>
+            <th class="mdl-data-table__cell--non-numeric">Operaciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+            <td class="mdl-data-table__cell--non-numeric">{{ usuario.username }}</td>
+            <td class="mdl-data-table__cell--non-numeric">{{ usuario.nombre }}</td>
+            <td class="mdl-data-table__cell--non-numeric">{{ usuario.apellidos }}</td>
+            <td class="mdl-data-table__cell--non-numeric">{{ usuario.email }}</td>
+
+            <td class="mdl-data-table__cell--non-numeric">
+                {% for rol in usuario.roles2 %}
+                    {{ rol.descripcion }}<br>
+                {% endfor %}
+            </td>
+
+            <td class="mdl-data-table__cell--non-numeric">
+                {% for sucursal in usuario.sucursales %}
+                    {{ sucursal.nombre }}<br>
+                {% endfor %}
+            </td>
+
+            <td class="mdl-data-table__cell--non-numeric">{% if usuario.isActive %}Si{% else %}No{% endif %}</td>
+            <td class="mdl-data-table__cell--non-numeric">
+                <a href="{{ path('usuario_edit', { 'id': usuario.id }) }}"><i class="material-icons">edit</i></a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    </div>
+
+    <style>
+        button
+        {
+            margin-bottom: 1em;
+        }
+    </style>
+
+{% endblock %}

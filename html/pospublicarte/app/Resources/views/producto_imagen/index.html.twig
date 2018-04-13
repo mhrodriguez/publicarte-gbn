@@ -1,0 +1,89 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <h3>{{ producto.nombre }}</h3>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('productoimagen_new', {'idProducto':producto.id}) }}'">
+                Nuevo
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+    </div>
+
+    <div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+        <thead>
+            <tr>
+                <th class="mdl-data-table__cell--non-numeric"></th>
+                <th class="mdl-data-table__cell--non-numeric">Titulo</th>
+                <th class="mdl-data-table__cell--non-numeric">Descripcion</th>
+                <th class="mdl-data-table__cell--non-numeric">Activo</th>
+                <th class="mdl-data-table__cell--non-numeric">Operaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% set index = 0 %}
+        {% for imagen in producto.imagenes %}
+            <tr>
+                <td class="mdl-data-table__cell--non-numeric"><img class="imagenproducto" src="{{ path('imagen_show', {'id':imagen.id }) }}" /></td>
+                <td class="mdl-data-table__cell--non-numeric">{{ imagen.titulo }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ imagen.descripcion }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{% if imagen.activo %}Si{% else %}No{% endif %}</td>
+                <td>
+                    {% set idform = 'form'  %}
+                    {{ form_start(delete_views[index], {'attr': {'id': 'form' ~ index|number_format }}) }}
+                        <a href="#" onclick="confirmarBorrar(document.getElementById('form{{ index }}'));"><i class="material-icons">delete</i></a>
+                    {{ form_end(delete_views[index]) }}
+                </td>
+            </tr>
+            {% set index = index + 1 %}
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <a href="{{ path('producto_index', {}) }}" style="cursor:pointer;">Volver a productos</a>
+        </div>
+    </div>
+
+    <script>
+        function confirmarBorrar(form) {
+            if (confirm("¿Está seguro de borrar esta imagen?"))
+            {
+                mostrarProgreso(true);
+                form.action = form.action + '?idProducto={{ producto.id }}';
+                form.submit();
+            }
+        }
+    </script>
+
+    <style>
+        .imagenproducto
+        {
+            width: 12em;
+            height: 12em;
+        }
+    </style>
+{% endblock %}

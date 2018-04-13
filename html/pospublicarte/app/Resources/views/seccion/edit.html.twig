@@ -1,0 +1,51 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <span class="mdl-layout-title">Editar Sección</span>
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.nombre) }}
+                        {{ form_label(edit_form.nombre) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield">
+                        Activo {{ form_widget(edit_form.activo) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Guardar</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('seccion_index', {'idSucursal' : sucursal.id}) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+
+            {{ form_end(edit_form) }}
+
+            <div>
+                {{ form_errors(edit_form.nombre) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form label').addClass('mdl-textfield__label')
+    </script>
+
+{% endblock %}

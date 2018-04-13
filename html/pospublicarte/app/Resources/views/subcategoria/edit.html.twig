@@ -1,0 +1,64 @@
+
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <span class="mdl-layout-title">Editar Subcategoria</span>
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.nombre) }}
+                        {{ form_label(edit_form.nombre) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <label id="lblCategoriaNombre" class="mdl-label">
+                        {{ edit_form.categoria.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.categoria) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield">
+                        Activo {{ form_widget(edit_form.activo) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--1-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('subcategoria_index', {}) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+
+            {{ form_end(edit_form) }}
+
+            <div>
+                {{ form_errors(edit_form.nombre) }}
+                {{ form_errors(edit_form.categoria) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+    </script>
+
+{% endblock %}

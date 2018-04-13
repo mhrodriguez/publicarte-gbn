@@ -1,0 +1,60 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--10-col">
+        </div>
+        <div class="mdl-cell mdl-cell--2-col">
+            <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="window.location.href = '{{ path('venta_index') }}';">Vista de tabla</button>
+        </div>
+    </div>
+
+    <div id="chart_div" style="height: 35em"></div>
+
+    <script>
+
+        function dibujarGrafica()
+        {
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Periodo');
+            data.addColumn('number', 'Año Actual');
+            data.addColumn('number', 'Año Anterior');
+
+            data.addRows([
+                {% for venta in ventas %}
+                [ '{{ venta['periodo'] }}', {{ venta['totalactual'] }}, {{ venta['totalanterior'] }}],
+                {% endfor %}
+            ]);
+
+            var options = {
+                hAxis: {
+                    title: 'Periodo'
+                },
+                vAxis: {
+                    title: 'Monto'
+                }
+            };
+
+            var chart = new google.visualization.ColumnChart(
+                    document.getElementById('chart_div'));
+
+            chart.draw(data, options);
+        }
+
+        google.charts.load('current', {packages: ['corechart', 'bar']});
+        google.charts.setOnLoadCallback(dibujarGrafica);
+
+    </script>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

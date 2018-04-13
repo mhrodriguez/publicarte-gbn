@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block header %}
+    {% embed "header.html.twig" %}
+        {% block contenido %}
+
+            <br><br>
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col"></div>
+                <div class="mdl-cell mdl-cell--4-col mdl-shadow--2dp">
+                    <form action="{{ path('login') }}" method="post" onsubmit="mostrarProgreso(true); return true;" >
+                        <br><br>
+                        <span class="mdl-layout-title">Acceso</span>
+                        <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="text" id="username" name="_username" required="required"/>
+                                <label class="mdl-textfield__label" for="username">Usuario</label>
+                        </div>
+                        <div class="mdl-textfield mdl-js-textfield">
+                            <input class="mdl-textfield__input" type="password" id="password" name="_password" required="required"/>
+                            <label class="mdl-textfield__label" for="password">Contraseña</label>
+                        </div>
+                        <br><br>
+                        <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Entrar</button>
+
+                        <input type="hidden" name="_target_path" value="panelcotizacion_index" />
+
+                        {% if error %}
+                            <br><br>
+                            <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                        {% endif %}
+                    </form>
+
+                </div>
+                <div class="mdl-cell mdl-cell--4-col"></div>
+            </div>
+
+            <style>
+                form {
+                padding-left: 3em;
+                padding-right: 3em;
+                padding-bottom: 3em;
+                }
+            </style>
+
+        {% endblock %}
+    {% endembed  %}
+{% endblock %}
+
+{% block body %}
+{% endblock %}

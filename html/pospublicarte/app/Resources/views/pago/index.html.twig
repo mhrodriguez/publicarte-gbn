@@ -1,0 +1,239 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+            <h4>Orden {{ orden.id }}</h4>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+            <h5>Total: {{ orden.moneda.simbolo }} {{ orden.total | number_format(2, '.', ',') }}</h5>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <h5>Pagado: {{ orden.moneda.simbolo }} {{ orden.saldoPagado | number_format(2, '.', ',') }}</h5>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <h5>Pendiente: {{ orden.moneda.simbolo }} {{ orden.saldoPendiente | number_format(2, '.', ',') }}</h5>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--9-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('pago_new', {'idOrden' : orden.id }) }}'">
+                Nuevo Pago
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col">
+
+        </div>
+    </div>
+
+    {% if pagos|length > 0 %}
+    {% for index in 1 .. pagos|length %}
+        {% set pago = pagos[index-1] %}
+        {% if (pago.validado == false and is_granted('ROLE_EMPRESA')) %}
+
+            {% set validarForm = validarForms[index-1] %}
+            {% set frmNombre = 'frm' ~ pago.id %}
+            {{ form_start(validarForm, {'attr': {'id': frmNombre }} ) }}{{ form_end(validarForm) }}
+
+            {% set borrarForm = borrarForms[index-1] %}
+            {% set frmNombre = 'frmBorrar' ~ pago.id %}
+            {{ form_start(borrarForm, {'attr': {'id': frmNombre }} ) }}{{ form_end(borrarForm) }}
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <br>
+            <div>(<i class="material-icons">edit</i>) Editar &emsp;(<i class="material-icons">done_all</i>) Aprobar&emsp; (<i class="material-icons">get_app</i>) Descargar&emsp; (<i class="material-icons">print</i>) Imprimir</div>
+
+            <script>
+                var items = [
+                    {% if pagos|length > 0 %}
+                    {% for index in 1 .. pagos|length %}
+                    {% set pago = pagos[index-1] %}
+                    {% set frmNombre = 'frm' ~ pago.id %}
+                    {% set frmBorrarNombre = 'frmBorrar' ~ pago.id %}
+                    {
+                        "Id": {{ pago.id }},
+                        "Usuario": {{ pago.usuario.id }},
+                        "Tipo": {{ pago.tipo.id }},
+                        "Monto": "{{ pago.moneda.simbolo }} {{ pago.monto | number_format(2, '.', ',') }}",
+                        "Fecha": "{{ pago.fecha | date('Y-m-d') }}",
+                        "FechaPago": {% if pago.fechapago %} "{{ pago.fechapago | date('Y-m-d') }}" {% else %} "" {% endif %},
+                        "Validado": {% if pago.validado %}true{% else %}false{% endif %},
+                        "Operaciones": "{% if (pago.validado == false) %}<a href=\"{{ path('pago_edit', { 'id': pago.id }) }}\"><i class=\"material-icons\">edit</i></a>{% endif %}<span></span>{% if (pago.validado == false and is_granted('ROLE_EMPRESA')) %}<a href=\"#\" onclick=\"if (confirm('¿Está seguro de validar este pago?')) document.getElementById('{{ frmNombre }}').submit();\"><i class=\"material-icons\">done_all</i></a><span></span>{% endif %}<a target=\"_blank\" href=\"{{ path('pago_showprint', { 'id': pago.id }) }}\"><i class=\"material-icons\">print</i></a><span></span><a href=\"{{ path('pago_showpdf', { 'id': pago.id }) }}\"><i class=\"material-icons\">get_app</i></a>{% if (pago.validado == false and is_granted('ROLE_EMPRESA')) %}<a href=\"#\" onclick=\"if (confirm('¿Está seguro de borrar este pago?')) document.getElementById('{{ frmBorrarNombre }}').submit();\"><i class=\"material-icons\">delete</i></a><span></span>{% endif %}"
+                    },
+                    {% endfor %}
+                    {% endif %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: true,
+
+                            pageIndex: 1,
+                            pageSize: 20,
+
+                            pagePrevText: "<",
+                            pageNextText: ">",
+                            pageFirstText: "Primera",
+                            pageLastText: "Última",
+                            pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                            noDataContent: "No se encontraron registros",
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            fields: [
+                                { name: "Id", title: "Id", type: "text", width: "1.5em", css: "textofila", filtering:false },
+
+                                { name: "Usuario", title: "Usuario", type: "select", width: "8em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for usuario in usuarios %}
+                                        {
+                                            "Id": {{ usuario.id }},
+                                            "Nombre": "{{ usuario.nombre }} {{ usuario.apellidos }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+
+                                { name: "Tipo", title: "Concepto", type: "select", width: "8em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for tipo in tipos %}
+                                        {
+                                            "Id": {{ tipo.id }},
+                                            "Nombre": "{{ tipo.nombre }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+
+                                { name: "Monto",title: "Monto", type: "text", width: "4em", css: "textofila", filtering:false},
+                                { name: "Fecha", title: "Fecha de Alta", type: "text", width: "5em", css: "textofila" },
+                                { name: "FechaPago", title: "Fecha de Pago", type: "text", width: "5em", css: "textofila" },
+                                { name: "Validado",title: "Validado", type: "checkbox", width: "3em", css: "textofila"},
+                                { name: "Operaciones", title: "Operaciones", type: "html", width: "4em", css: "textofila" },
+                                { type: "control", width: "2em",  editButton: false, deleteButton: false },
+                            ],
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Usuario != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (filter.Usuario>0) {
+                                                return (item.Usuario == filter.Usuario);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Tipo != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (filter.Tipo>0) {
+                                                return (item.Tipo == filter.Tipo);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Fecha != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Fecha.toUpperCase().indexOf(filter.Fecha.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.FechaPago != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.FechaPago.toUpperCase().indexOf(filter.FechaPago.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Validado != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Validado == filter.Validado);
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+            <a href="{{ path('orden_index') }}">Ir a Ordenes</a>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <a href="{{ path('orden_indexfact') }}">Ir a Ordenes con Factura</a>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <a href="{{ path('orden_indexesp') }}">Ir a Ordenes Especiales</a>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}
+
+
+
+

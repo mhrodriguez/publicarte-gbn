@@ -1,0 +1,86 @@
+# To get started with security, check out the documentation:
+# http://symfony.com/doc/current/security.html
+security:
+
+    encoders:
+          AppBundle\Entity\Usuario:
+            algorithm: bcrypt
+
+    # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+    providers:
+        pos_db_provider:
+            entity:
+                class: AppBundle:Usuario
+                property: username
+
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            anonymous: ~
+            # activate different ways to authenticate
+
+            # http://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
+            #http_basic: ~
+
+            # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+            #form_login: ~
+            form_login:
+              login_path: login
+              check_path: login
+
+            logout:
+              path:   /logout
+              target: /
+
+    access_control:
+        - { path: /ws/producto, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/combinacion, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/usuario, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/sucursal, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/imagen, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/seccion, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/venta, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/cotizacion, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /ws/cortecaja, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /cotizacion/showprint, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /orden/showprint, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /pago/showprint, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+
+        - { path: /cotizacion/index, roles: ['ROLE_EMPRESA','ROLE_VENDEDOR','ROLE_COBRANZA'] }
+
+        - { path: /principal, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA', 'ROLE_VENDEDOR'] }
+        - { path: /principal/empresa, roles: ['ROLE_EMPRESA'] }
+        - { path: /principal/vendedor, roles: ['ROLE_VENDEDOR'] }
+
+        - { path: /usuario/new, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA'] }
+        - { path: /usuario/index, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA'] }
+        - { path: /usuario/edit, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA', 'ROLE_VENDEDOR'] }
+        - { path: /usuario/delete, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA'] }
+        - { path: /usuario/miperfil, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA', 'ROLE_VENDEDOR'] }
+        - { path: /usuario/changemypassword, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA', 'ROLE_VENDEDOR'] }
+        - { path: /usuario/changepassword, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA'] }
+
+        - { path: /producto, roles: ['ROLE_EMPRESA'] }
+        - { path: /categoria, roles: ['ROLE_EMPRESA'] }
+        - { path: /subcategoria, roles: ['ROLE_EMPRESA'] }
+        - { path: /sucursal, roles: ['ROLE_EMPRESA'] }
+        - { path: /seccion, roles: ['ROLE_EMPRESA'] }
+        - { path: /combinacion, roles: ['ROLE_EMPRESA'] }
+        - { path: /combinacionitem, roles: ['ROLE_EMPRESA'] }
+        - { path: /venta, roles: ['ROLE_EMPRESA'] }
+        - { path: /cliente, roles: ['ROLE_EMPRESA','ROLE_VENDEDOR'] }
+        - { path: /contacto, roles: ['ROLE_EMPRESA','ROLE_VENDEDOR'] }
+        - { path: /cotizacion, roles: ['ROLE_EMPRESA','ROLE_VENDEDOR'] }
+
+        - { path: /orden, roles: ['ROLE_EMPRESA', 'ROLE_VENDEDOR', 'ROLE_COBRANZA'] }
+        - { path: /pago, roles: ['ROLE_EMPRESA','ROLE_VENDEDOR', 'ROLE_COBRANZA'] }
+
+        - { path: /factura, roles: ['ROLE_EMPRESA'] }
+
+        - { path: /productoimagen, roles: ['ROLE_EMPRESA'] }
+
+        - { path: /imagen, roles: ['ROLE_ADMINISTRADOR', 'ROLE_EMPRESA', 'ROLE_VENDEDOR'] }

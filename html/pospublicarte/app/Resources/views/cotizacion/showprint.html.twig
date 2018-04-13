@@ -1,0 +1,176 @@
+<body onload="window.print();">
+{% image '@FrameworkBundle/Resources/public/images/img_header.jpg' %}
+<img src="{{ asset_url }}" style="height:10em;width:100%">
+{% endimage %}
+
+<div style="margin: 2em;">
+<table>
+    <tr>
+        <td style="width:20%;">
+        </td>
+        <td style="width:58%;text-align: center">
+        </td>
+        <td style="width:22%;">
+            <table>
+                <tr>
+                    {% set mes = cotizacion.fecha|date('F') %}
+                    {% if (mes == "January") %} {% set mes = "ENERO" %} {% endif %}
+                    {% if (mes == "February") %} {% set mes = "FEBRERO" %} {% endif %}
+                    {% if (mes == "March") %} {% set mes = "MARZO" %} {% endif %}
+                    {% if (mes == "April") %} {% set mes = "ABRIL" %} {% endif %}
+                    {% if (mes == "May") %} {% set mes = "MAYO" %} {% endif %}
+                    {% if (mes == "June") %} {% set mes = "JUNIO" %} {% endif %}
+                    {% if (mes == "July") %} {% set mes = "JULIO" %} {% endif %}
+                    {% if (mes == "August") %} {% set mes = "AGOSTO" %} {% endif %}
+                    {% if (mes == "September") %} {% set mes = "SEPTIEMBRE" %} {% endif %}
+                    {% if (mes == "October") %} {% set mes = "OCTUBRE" %} {% endif %}
+                    {% if (mes == "November") %} {% set mes = "NOVIEMBRE" %} {% endif %}
+                    {% if (mes == "December") %} {% set mes = "DICIEMBRE" %} {% endif %}
+                    <td>{{ cotizacion.fecha | date('d') }} DE {{ mes }} DEL {{ cotizacion.fecha | date('Y') }}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<p><b>
+    {% if (cotizacion.contacto) %}
+        {% filter upper %}
+            {{ cotizacion.contacto.nombre }} {{ cotizacion.contacto.apellidos }}
+        {% endfilter %}
+    {% endif %}
+    <br/>
+
+    {% if (cotizacion.cliente) %}
+        {% filter upper %}
+            {{ cotizacion.cliente.razonsocial }}
+        {% endfilter %}
+    {% endif %}
+    <br/>
+    PRESENTE
+</b></p>
+<p>
+    PRESENTO A USTED LA SIGUIENTE COTIZACIÓN:
+</p>
+<br>
+<table>
+    <tr class="header">
+        <td class="separador" style="width:10%">NO.</td>
+        <td class="separador" style="width:30%">SERVICIO</td>
+        <td class="separador" style="width:30%">DESCRIPCIÓN</td>
+        <td class="separador" style="width:10%">CANTIDAD</td>
+        <td class="separador numero" style="width:10%">PRECIO UNITARIO</td>
+        <td class="separador numero" style="width:10%">IMPORTE</td>
+    </tr>
+    {% set no = 1 %}
+    {% for item in cotizacion.items %}
+    <tr>
+        <td>{{ no }}</td>
+        <td>{% if (item.producto) %} {% filter upper %} {{ item.producto.nombre }} {% endfilter %} {% endif %}</td>
+        <td style="text-transform: uppercase"> {{ item.descripcion | nl2br }}</td>
+        <td>{{ item.cantidad }}</td>
+        <td class="numero">$ {{ item.precio | number_format(2, '.', ',') }}</td>
+        <td class="numero">$ {{ (item.cantidad * item.precio) | number_format(2, '.', ',') }}</td>
+    </tr>
+    {% set no = no + 1 %}
+    {% endfor %}
+</table>
+
+<table>
+    <tr class="header">
+        <td style="width: 80%"></td>
+        <td style="width: 10%" class="numero">SUBTOTAL</td>
+        <td style="width: 10%" class="numero">$ {{ cotizacion.subtotal | number_format(2, '.', ',') }}</td>
+    </tr>
+    <tr class="header">
+        <td class="separador"></td>
+        <td class="separador numero" style="width: 10%">IVA</td>
+        <td class="separador numero" style="width: 10%">$ {{ cotizacion.iva | number_format(2, '.', ',') }}</td>
+    </tr>
+    <tr class="header">
+        <td class="separador"></td>
+        <td class="separador numero" style="width: 10%">TOTAL</td>
+        <td class="separador numero" style="width: 10%">$ {{ cotizacion.total | number_format(2, '.', ',') }}</td>
+    </tr>
+</table>
+<br>
+<p>
+    ESPERAMOS VERNOS FAVORECIDOS EN ESPERA DE SU PRONTA RESPUESTA A LA PRESENTE, APROVECHO LA OPORTUNIDAD PARA REITERARLE SU CONSIDERACIÓN Y RESPETO.
+</p>
+<p>
+    TIEMPO DE ENTREGA: {% filter upper %}{{ cotizacion.tiempoentrega }}{% endfilter %}<br>
+    FORMA DE PAGO: {% filter upper %}{{ cotizacion.esquemapago.nombre }}{% endfilter %}<br><br>
+    COTIZACIÓN VIGENTE HASTA: {{ cotizacion.fechavalida | date('d/m/Y') }}
+</p>
+<br>
+<p class="firma">
+ATENTAMENTE<br>
+{% if cotizacion.usuario.firma %}
+    <img src="{{ path('imagen_show', {'id' : cotizacion.usuario.firma.id }) }}" style="width: auto; height: 5em;"/>
+{% else %}
+    <br><br><br>
+{% endif %}
+<br>
+___________________________________________<br>
+{% filter upper %}
+{{ cotizacion.usuario.nombrecompleto }}
+{% endfilter %}
+<br>
+GERENTE ADMINISTRATIVO
+</p>
+</div>
+
+
+<style>
+    body
+    {
+        margin: 0px;
+    }
+
+    table
+    {
+        width:100%;
+        border-spacing: 0px;
+    }
+    tr
+    {
+        width:100%;
+    }
+    .header {
+        background-color: #EEEEEE;
+    }
+    .separador
+    {
+        border-bottom:1px solid black;
+    }
+    p
+    {
+        text-align: match-parent;
+        font-size: 13px;
+    }
+    p.firma
+    {
+        text-align: center;
+        font-weight: bold;
+    }
+    td
+    {
+        font-size: 11px;
+    }
+    .numero
+    {
+        text-align: right;
+    }
+</style>
+</body>

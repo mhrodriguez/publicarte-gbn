@@ -1,0 +1,173 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    {% if facturas|length > 0 %}
+        {% for index in 1 .. facturas|length %}
+            {% set factura = facturas[index-1] %}
+            {% if (factura.estado.id != 2) %}
+                {% set cobrarForm = cobrarForms[index-1] %}
+                {% set frmNombre = 'frm' ~ factura.id %}
+                {{ form_start(cobrarForm, {'attr': {'id': frmNombre }} ) }}{{ form_end(cobrarForm) }}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <script>
+                var items = [
+
+                    {% if facturas|length > 0 %}
+                    {% for index in 1 .. facturas|length %}
+                    {
+                        {% set factura = facturas[index-1] %}
+                        {% set frmNombre = 'frm' ~ factura.id %}
+                        "Fecha": "{{ factura.fecha|date('Y-m-d') }}",
+                        "Orden": {{ factura.orden.id }},
+                        "Estado": {{ factura.estado.id }},
+                        "Id": "{{ factura.id }}",
+                        "Subtotal": "{{ factura.moneda.simbolo }} {{ (factura.subtotal) | number_format(2, '.', ',') }}",
+                        "IVA": "{{ factura.moneda.simbolo }} {{ (factura.iva) |number_format(2, '.', ',') }}",
+                        "Total": "{{ factura.moneda.simbolo }} {{ (factura.total) |number_format(2, '.', ',') }}",
+                        "Operaciones": "{% if (factura.estado.id != 2) %}<a href=\"#\" onclick=\"if (confirm('¿Está seguro de marcar esta factura como cobrada?')) document.getElementById('{{ frmNombre }}').submit();\"><i class=\"material-icons\">done_all</i></a>{% endif %}"
+                    },
+                    {% endfor %}
+                    {% endif %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            pageIndex: 1,
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            pagePrevText: "<",
+                            pageNextText: ">",
+                            pageFirstText: "Primera",
+                            pageLastText: "Última",
+                            pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Id",title: "Folio", type: "text", width: "3em", css: "textofila", filtering:false},
+                                { name: "Fecha", title: "Fecha", type: "text", width: "4em", css: "textofila" },
+                                { name: "Estado", title: "Estado", type: "select", width: "4em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todos" },
+                                        {% for estado in estados %}
+                                        {
+                                            "Id": {{ estado.id }},
+                                            "Nombre": "{{ estado.nombre }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+                                { name: "Orden",title: "Folio de Orden de Trabajo", type: "text", width: "3em", css: "textofila", filtering:false},
+                                { name: "Subtotal", title: "Subtotal", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "IVA", title: "IVA", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Total", title: "Total", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Operaciones", title: "Operaciones", type: "html", width: "4em", css: "textofila", filtering:false },
+                                { type: "control", width: "2em",  editButton: false, deleteButton: false },
+                            ],
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Fecha != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Fecha.toUpperCase().indexOf(filter.Fecha.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Estado != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            if (filter.Estado>0) {
+                                                return (item.Estado == filter.Estado);
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <script>
+        $( function() {
+            prepararCalendario($( "#inpFechaInicio" ));
+            prepararCalendario($( "#inpFechaFin" ));
+        } );
+
+        function prepararCalendario(control)
+        {
+            control.datepicker({
+                        dateFormat: "dd-mm-yy",
+                        monthNames: [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+                    }
+            );
+        }
+
+        function fechaInicioCambio()
+        {
+            mostrarProgreso(true);
+            window.location.href = '{{ path('factura_index') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();
+        }
+
+        function fechaFinCambio()
+        {
+            mostrarProgreso(true);
+            window.location.href = '{{ path('factura_index') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();
+        }
+    </script>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

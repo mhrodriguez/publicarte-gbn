@@ -1,0 +1,92 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            {{ form_start(form, {'attr': {'onsubmit': 'return datasubmit();'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-label">
+                        {{ form.cliente.vars.label }}
+                    </label>
+                    {{ form_widget(form.cliente) }}
+                    {{ form_errors(form.cliente) }}
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.foliofactura) }}
+                        {{ form_label(form.foliofactura) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(form.total, {'attr': {'pattern': '[0-9]*(\.[0-9]+)?'}}) }}
+                        {{ form_label(form.total) }}
+                        <span class="mdl-textfield__error">Total debe ser numérico</span>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(form.abono, {'attr': {'pattern': '[0-9]*(\.[0-9]+)?'}}) }}
+                        {{ form_label(form.abono) }}
+                        <span class="mdl-textfield__error">Abono debe ser numérico</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--1-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('orden_indexfact', {}) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+            {{ form_end(form) }}
+
+            <div>
+                {{ form_errors(form) }}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+
+        $( function() {
+            $('#appbundle_orden_cliente').select2();
+        } );
+    </script>
+
+    <script>
+        function datasubmit()
+        {
+            mostrarProgreso(true);
+
+            return true;
+        }
+    </script>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+

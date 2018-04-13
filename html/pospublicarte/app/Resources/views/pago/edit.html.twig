@@ -1,0 +1,123 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+            <h4>Orden {{ pago.orden.id }}</h4>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+            <h5>Total: {{ pago.orden.moneda.simbolo }} {{ pago.orden.total | number_format(2, '.', ',') }}</h5>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <h5>Pagado: {{ pago.orden.moneda.simbolo }} {{ pago.orden.saldoPagado | number_format(2, '.', ',') }}</h5>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <h5>Pendiente: {{ pago.orden.moneda.simbolo }} {{ pago.orden.saldoPendiente | number_format(2, '.', ',') }}</h5>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'datasubmit(); mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-label">
+                        {{ edit_form.tipo.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.tipo) }}
+                    </div>
+                    {{ form_errors(edit_form.tipo) }}
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-label">
+                        {{ edit_form.mediopago.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.mediopago) }}
+                    </div>
+                    {{ form_errors(edit_form.mediopago) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.monto, {'attr': {'pattern': '[0-9]*(\.[0-9]+)?'}}) }}
+                        {{ form_label(edit_form.monto) }}
+                        <span class="mdl-textfield__error">Monto debe ser numérico</span>
+                    </div>
+                    {{ form_errors(edit_form.monto) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-cell--12-col">
+                        <label for="appbundle_pago_fechapago">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ edit_form.fechapago.vars.label }}
+                        </label>
+                        <i class="material-icons" style="vertical-align: middle;">insert_invitation</i>
+                        {{ form_widget(edit_form.fechapago) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Guardar</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="javascript:history.back()" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+            {{ form_end(edit_form) }}
+
+            <div>
+                {{ form_errors(edit_form) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+
+        $( function() {
+            prepararCalendario($( "#appbundle_pago_fechapago" ));
+        } );
+
+        function prepararCalendario(control)
+        {
+            control.datepicker({
+                        defaultDate: new Date(),
+                        dateFormat: "dd/mm/yy",
+                        monthNames: [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+                    }
+            );
+        }
+    </script>
+
+    <script>
+        function datasubmit()
+        {
+        }
+    </script>
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}
+

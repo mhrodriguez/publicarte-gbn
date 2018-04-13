@@ -1,0 +1,86 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            <span class="mdl-layout-title">Mi Perfil - {{ usuario.username }}</span>
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'mostrarProgreso(true); return true;'}} ) }}
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.nombre) }}
+                        {{ form_label(edit_form.nombre) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.apellidos) }}
+                        {{ form_label(edit_form.apellidos) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.email) }}
+                        {{ form_label(edit_form.email) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    {% if usuario.firma %}
+                    <img src="{{ path('imagen_show', {'id' : usuario.firma.id }) }}" style="width: 100%; height: auto;"/>
+                    {% endif %}
+                </div>
+                <div class="mdl-cell mdl-cell--10-col">
+                    <label id="lblFirma" class="mdl-label">
+                        {{ edit_form.firmaimagen.vars.label }}
+                    </label>
+                    <div>
+                        {{ form_widget(edit_form.firmaimagen) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Guardar</button>
+                </div>
+            </div>
+            {{ form_end(edit_form) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <a href="{{ path('usuario_changemypassword') }}">Cambiar mi Password</a>
+                </div>
+            </div>
+
+            <div>
+                {{ form_errors(edit_form.nombre) }}
+                {{ form_errors(edit_form.apellidos) }}
+                {{ form_errors(edit_form.email) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form label').addClass('mdl-textfield__label')
+
+        document.getElementById('usuario_email').required=false;
+
+        $('#lblFirma').removeClass('mdl-textfield__label');
+    </script>
+
+    <style>
+
+    </style>
+
+{% endblock %}

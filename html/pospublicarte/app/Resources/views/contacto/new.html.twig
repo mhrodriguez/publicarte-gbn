@@ -1,0 +1,95 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            {{ form_start(form, {'attr': {'onsubmit': 'datasubmit(); mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.nombre) }}
+                        {{ form_label(form.nombre) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.apellidos) }}
+                        {{ form_label(form.apellidos) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.puesto) }}
+                        {{ form_label(form.puesto) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.telefono) }}
+                        {{ form_label(form.telefono) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.correo) }}
+                        {{ form_label(form.correo) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.correofacturacion) }}
+                        {{ form_label(form.correofacturacion) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <label class="mdl-label">
+                        {{ form.mediopago.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(form.mediopago) }}
+                    </div>
+                    {{ form_errors(form.mediopago) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--1-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('contacto_index', {'idCliente': idCliente}) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+            {{ form_end(form) }}
+
+            <div>
+                {{ form_errors(form.correo) }}
+                {{ form_errors(form.correofacturacion) }}
+                {{ form_errors(form) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+    </script>
+
+    <script>
+        function datasubmit()
+        {
+        }
+    </script>
+{% endblock %}
+

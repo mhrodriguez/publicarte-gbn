@@ -1,0 +1,33 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid"></div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Nombre</th>
+                    <th class="mdl-data-table__cell--non-numeric">Activo</th>
+                    <th class="mdl-data-table__cell--non-numeric">Operaciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for sucursal in sucursales %}
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">{{ sucursal.nombre }}</td>
+                        <td class="mdl-data-table__cell--non-numeric">{% if sucursal.activo %}Si{% else %}No{% endif %}</td>
+                        <td>
+                            <a href="{{ path('sucursal_edit', { 'id': sucursal.id }) }}"><i class="material-icons">edit</i></a>
+                            <a href="{{ path('seccion_index', {'idSucursal' : sucursal.id }) }}"><i class="material-icons">border_outer</i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <span class="mdl-layout-title">Editar Elemento</span>
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'datasubmit(); mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label id="lblCategoriaNombre" class="mdl-label">
+                        {{ edit_form.categoria.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.categoria) }}
+                    </div>
+                    {{ form_errors(edit_form.categoria) }}
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label id="lblSubcategoriaNombre" class="mdl-label">
+                        {{ edit_form.subcategoria.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.subcategoria) }}
+                    </div>
+                    {{ form_errors(edit_form.subcategoria) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.cantidad, {'attr': {'pattern': '?[0-9]*'}}) }}
+                        {{ form_label(edit_form.cantidad) }}
+                        <span class="mdl-textfield__error">Precio debe ser numérico entero</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield">
+                        Incluido en el precio {{ form_widget(edit_form.incluido) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Guardar</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('combinacionitem_index', {'idCombinacion':idCombinacion}) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+
+            {{ form_end(edit_form) }}
+
+            <div>
+                {{ form_errors(edit_form.categoria) }}
+                {{ form_errors(edit_form.subcategoria) }}
+                {{ form_errors(edit_form.cantidad) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var selectSubcategoria = $("#appbundle_combinacionitem_subcategoria");
+
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+
+        if( $('#appbundle_combinacionitem_subcategoria').has('option').length > 0 ) {
+            var option = $("<option></option>");
+            option.attr("value", -1).text("Ninguna");
+            option.insertBefore("#appbundle_combinacionitem_subcategoria option:first");
+        }
+        else
+        {
+            selectSubcategoria.append($("<option></option>").attr("value", -1).text("Ninguna"));
+        }
+
+        $( "#appbundle_combinacionitem_categoria" ).change(function() {
+
+            var indexCategoria = $( "#appbundle_combinacionitem_categoria").val();
+
+            selectSubcategoria.empty(); // remove old options
+            selectSubcategoria.append($("<option></option>").attr("value", -1).text("Ninguna"));
+
+            if (indexCategoria >= 0) {
+                mostrarProgreso(true);
+
+                var url = 'http://' + window.location.hostname + '{{ path('subcategoria_index', {}) }}.json?idCategoria=' + indexCategoria;
+
+                $.ajax({
+                    url: url, dataType: "json",
+                    success: function (data) {
+
+                        var selectSubcategoria = $("#appbundle_combinacionitem_subcategoria");
+
+                        var index=0;
+                        $.each(data, function (key, value) {
+                            selectSubcategoria.append($("<option></option>")
+                                    .attr("value", data[index].id).text(data[index].nombre));
+                            index++;
+                        });
+
+                        mostrarProgreso(false);
+
+                        $("#appbundle_combinacionitem_subcategoria").val(-1);
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script>
+        function datasubmit()
+        {
+            if ( $( "#appbundle_combinacionitem_subcategoria").val() == -1 )
+            {
+                $( "#appbundle_combinacionitem_subcategoria").val(null)
+            }
+        }
+    </script>
+
+{% endblock %}
+

@@ -1,0 +1,206 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--3-col">
+            <label class="mdl-label">Desde</label>
+            <i class="material-icons" style="vertical-align: middle;">insert_invitation</i>
+            <input type="text" id="inpFechaInicio" value="{{ fechaIniciostr }}" onchange="fechaInicioCambio();" />
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <label class="mdl-label">Hasta</label>
+            <i class="material-icons" style="vertical-align: middle;">insert_invitation</i>
+            <input type="text" id="inpFechaFin" value="{{ fechaFinstr }}" onchange="fechaFinCambio();"/>
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+        </div>
+        <div class="mdl-cell mdl-cell--2-col">
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <script>
+                var items = [
+                    {% for cortecaja in cortecajas %}
+                    {
+                        "Fecha": "{{ cortecaja.fecha|date('Y-m-d H:i:s') }}<br><a href='{{ path('cortecaja_show', { 'id': cortecaja.id }) }}'><i class='material-icons'>visibility</i></a>",
+                        "Sucursal": {{ cortecaja.sucursal.id }},
+                        "Usuario": {{ cortecaja.usuario.id }},
+                        "Periodo": "{{ cortecaja.fechainicio|date('Y-m-d H:i:s') }}<br>a<br>{{ cortecaja.fechafin|date('Y-m-d H:i:s') }}",
+                        "TotalEfectivo": "{{ cortecaja.moneda.simbolo }} {{ cortecaja.totalefectivo | number_format(2, '.', ',') }}",
+                        "TotalTarjetaCredito": "{{ cortecaja.moneda.simbolo }} {{ cortecaja.totaltarjetacredito | number_format(2, '.', ',') }}",
+
+                        "TotalEfectivoReportado": "{{ cortecaja.moneda.simbolo }} {{ cortecaja.totalefectivoreportado | number_format(2, '.', ',') }}",
+                        "TotalTarjetaCreditoReportado": "{{ cortecaja.moneda.simbolo }} {{ cortecaja.totaltarjetacreditoreportado | number_format(2, '.', ',') }}",
+
+                        "Remanente": "{{ cortecaja.moneda.simbolo }} {{ cortecaja.remanente | number_format(2, '.', ',') }}",
+                    },
+
+                    {% endfor %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            pageIndex: 1,
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            pagePrevText: "<",
+                            pageNextText: ">",
+                            pageFirstText: "Primera",
+                            pageLastText: "Última",
+                            pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Fecha", title: "Fecha", type: "html", width: "5.5em", css: "textofila", filtering:false },
+                                { name: "Sucursal", title: "Sucursal", type: "select", width: "8em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todas" },
+                                        {% for sucursal in sucursales %}
+                                        {
+                                            "Id": {{ sucursal.id }},
+                                            "Nombre": "{{ sucursal.nombre }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+                                { name: "Usuario", title: "Usuario", type: "select", width: "8em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todas" },
+                                        {% for usuario in usuarios %}
+                                        {
+                                            "Id": {{ usuario.id }},
+                                            "Nombre": "{{ usuario.nombre }}{% if usuario.apellidos is not null  %} {{ usuario.apellidos }}{% endif %}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+                                { name: "Periodo", title: "Periodo: ", type: "html", width: "6em", css: "textofila", filtering:false },
+
+                                { name: "TotalEfectivo", title: "Ventas en Efectivo", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "TotalTarjetaCredito", title: "Ventas con Tarjeta", type: "number", width: "4em", css: "textofila", filtering:false },
+
+                                { name: "TotalEfectivoReportado", title: "Ventas en Efectivo Reportadas", type: "number", width: "4em", css: "textofila", filtering:false },
+
+                                { name: "TotalTarjetaCreditoReportado", title: "Ventas con Tarjeta Reportadas", type: "number", width: "4em", css: "textofila", filtering:false },
+
+                                { name: "Remanente", title: "Remanente", type: "number", width: "3.5em", css: "textofila", filtering:false }
+                            ],
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Sucursal != null) {
+
+                                        registros = $.grep(registros, function (item) {
+                                            if (filter.Sucursal>0) {
+
+                                                return (item.Sucursal == filter.Sucursal);
+
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Usuario != null) {
+
+                                        registros = $.grep(registros, function (item) {
+                                            if (filter.Usuario>0) {
+
+                                                return (item.Usuario == filter.Usuario);
+
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <script>
+        $( function() {
+            prepararCalendario($( "#inpFechaInicio" ));
+            prepararCalendario($( "#inpFechaFin" ));
+        } );
+
+        function prepararCalendario(control)
+        {
+            control.datepicker({
+                        dateFormat: "dd-mm-yy",
+                        monthNames: [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+                    }
+            );
+        }
+
+        function fechaInicioCambio()
+        {
+            mostrarProgreso(true);
+            window.location.href = '{{ path('cortecaja_index') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();
+        }
+
+        function fechaFinCambio()
+        {
+            mostrarProgreso(true);
+            window.location.href = '{{ path('cortecaja_index') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();
+        }
+    </script>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

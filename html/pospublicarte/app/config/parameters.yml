@@ -1,0 +1,15 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_host: localhost
+    database_port: null
+    database_name: POS_Publicarte
+    database_user: publicarteapp
+    database_password: vzBTRUbz9XFJSTdK
+
+    mailer_transport: smtp
+    mailer_host: mail.damtec.mx
+    mailer_user: publicarte@damtec.mx
+    mailer_password: MpKJ;u5[JD?{
+
+    secret: 59918581cb5a959a196c310463dd17d840fae636
+

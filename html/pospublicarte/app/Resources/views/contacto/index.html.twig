@@ -1,0 +1,181 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    {% if contactos|length > 0 %}
+        {% for index in 1 .. contactos|length %}
+            {% set contacto = contactos[index-1] %}
+
+            {% set deleteForm = deleteForms[index-1] %}
+            {% set frmNombre = 'frmDelete' ~ contacto.id %}
+            {{ form_start(deleteForm, {'attr': {'id': frmNombre }} ) }}{{ form_end(deleteForm) }}
+
+        {% endfor %}
+    {% endif %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--9-col">
+            <h3>Contactos</h3>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('contacto_new', {'idCliente': idCliente}) }}'">
+                Nuevo Contacto
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col">
+
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <br>
+            <div>(<i class="material-icons">edit</i>) Editar &emsp; (<i class="material-icons">delete</i>) Borrar</div>
+
+            <script>
+                var items = [
+                    {% if contactos|length > 0 %}
+                    {% for index in 1 .. contactos|length %}
+                    {% set contacto = contactos[index-1] %}
+                    {% set frmNombreDelete = 'frmDelete' ~ contacto.id %}
+                    {
+                        "Id": {{ contacto.id }},
+                        "Nombre": "{{ contacto.nombre }}",
+                        "Apellidos": "{{ contacto.apellidos }}",
+                        "Puesto": "{{ contacto.puesto }}",
+                        "Correo": "{{ contacto.correo }}",
+                        "CorreoFacturacion": "{{ contacto.correofacturacion }}",
+                        "Telefono": "{{ contacto.telefono }}",
+                        "Activo": "{{ contacto.activo }}",
+                        "Operaciones": "<a href=\"{{ path('contacto_edit', { 'id': contacto.id, 'idCliente' : idCliente }) }}\"><i class=\"material-icons\">edit</i></a><span></span>{% if (is_granted('ROLE_EMPRESA')) %}<a href=\"#\" onclick=\"if (confirm('¿Está seguro de borrar este contacto?')) document.getElementById('{{ frmNombreDelete }}').submit();\"><i class=\"material-icons\">delete</i></a>{% endif %}"
+                    },
+                    {% endfor %}
+                    {% endif %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: true,
+
+                            pageIndex: 1,
+                            pageSize: 20,
+
+                            pagePrevText: "<",
+                            pageNextText: ">",
+                            pageFirstText: "Primera",
+                            pageLastText: "Última",
+                            pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                            noDataContent: "No se encontraron registros",
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            fields: [
+                                { name: "Id", title: "Id", type: "text", width: "1.5em", css: "textofila", filtering:false },
+                                { name: "Nombre",title: "Nombre", type: "text", width: "4em", css: "textofila"},
+                                { name: "Apellidos",title: "Apellidos", type: "text", width: "4em", css: "textofila"},
+                                { name: "Puesto", title: "Puesto", type: "text", width: "5em", css: "textofila" },
+                                { name: "Correo",title: "E-mail", type: "text", width: "7em", css: "textofila"},
+                                { name: "CorreoFacturacion",title: "E-mail de facturación", type: "text", width: "7em", css: "textofila"},
+                                { name: "Telefono",title: "Teléfono", type: "text", width: "4em", css: "textofila"},
+                                { name: "Activo",title: "Activo", type: "checkbox", width: "3em", css: "textofila"},
+                                { name: "Operaciones", title: "Operaciones", type: "html", width: "3em", css: "textofila" },
+                                { type: "control", width: "2em",  editButton: false, deleteButton: false },
+                            ],
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Nombre != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Nombre.toUpperCase().indexOf(filter.Nombre.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Apellidos != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Apellidos.toUpperCase().indexOf(filter.Apellidos.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Puesto != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Puesto.toUpperCase().indexOf(filter.Puesto.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Correo != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Correo.toUpperCase().indexOf(filter.Correo.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.CorreoFacturacion != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.CorreoFacturacion.toUpperCase().indexOf(filter.CorreoFacturacion.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Telefono != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Telefono.toUpperCase().indexOf(filter.Telefono.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    if (filter.Activo != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Activo == filter.Activo);
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--2-col">
+            <a href="{{ path('cliente_index') }}">Volver a Clientes</a>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

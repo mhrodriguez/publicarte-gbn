@@ -1,0 +1,64 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <span class="mdl-layout-title">Nueva Imagen</span>
+
+            {{ form_start(form, {'attr': {'onsubmit': 'mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.titulo) }}
+                        {{ form_label(form.titulo) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.descripcion, {'attr': {'rows': '3'}}) }}
+                        {{ form_label(form.descripcion) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <label id="lblFile" class="mdl-label">
+                        {{ form.file.vars.label }}
+                    </label>
+                    {{ form_widget(form.file) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--1-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('productoimagen_index', {'idProducto':producto.id} ) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+
+            <div>
+                {{ form_errors(form.titulo) }}
+                {{ form_errors(form.descripcion) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input:text').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+    </script>
+
+{% endblock %}

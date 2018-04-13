@@ -1,0 +1,62 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <h3>Mesas de {{ seccion.nombre }}</h3>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('mesa_new', { 'idSeccion': seccion.id } ) }}?backurl={{ path('mesa_index', { 'idSeccion': seccion.id } ) }}'">
+                Nueva
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Nombre</th>
+                    <th class="mdl-data-table__cell--non-numeric">Activo</th>
+                    <th class="mdl-data-table__cell--non-numeric">Operaciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for mesa in seccion.mesas %}
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">{{ mesa.nombre }}</td>
+                        <td class="mdl-data-table__cell--non-numeric">{% if mesa.activo %}Si{% else %}No{% endif %}</td>
+                        <td>
+                            <a href="{{ path('mesa_edit', { 'id': mesa.id }) }}?backurl={{ path('mesa_index', { 'idSeccion': seccion.id } ) }}"><i class="material-icons">edit</i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <a href="{{ backurl }}">Volver a secciones</a>
+        </div>
+    </div>
+
+
+{% endblock %}

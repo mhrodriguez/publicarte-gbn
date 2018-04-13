@@ -1,0 +1,138 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    {% if productos|length > 0 %}
+        {% for index in 1 .. productos|length %}
+            {% set producto = productos[index-1] %}
+
+            {% set deleteForm = deleteForms[index-1] %}
+            {% set frmNombre = 'frmDelete' ~ producto.id %}
+            {{ form_start(deleteForm, {'attr': {'id': frmNombre }} ) }}{{ form_end(deleteForm) }}
+
+        {% endfor %}
+    {% endif %}
+
+    <div style="margin: 1em;">
+
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--10-col">
+
+            </div>
+            <div class="mdl-cell mdl-cell--2-col">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                        onclick="window.location.href='{{ path('producto_new') }}'">
+                    Nuevo Servicio
+                </button>
+            </div>
+        </div>
+
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--12-col">
+
+                <div id="jsGrid"></div>
+                <br>
+                <div>(<i class="material-icons">edit</i>) Editar &emsp; (<i class="material-icons">delete</i>) Borrar</div>
+
+                <script>
+                    var productos = [
+
+                        {% if productos|length > 0 %}
+                        {% for index in 1 .. productos|length %}
+                        {% set producto = productos[index-1] %}
+                        {% set frmNombreDelete = 'frmDelete' ~ producto.id %}
+                        { "Id": {{ producto.id }},
+                            "Nombre": "{{ producto.nombre }}",
+                            "Precio": "{{ producto.moneda.simbolo }} {{ producto.precio | number_format(2, '.', ',') }}",
+                            "Operaciones" :
+                                    "<a href=\"{{ path('producto_edit', { 'id': producto.id }) }}\"><i class=\"material-icons\">edit</i></a><span></span>{% if (is_granted('ROLE_EMPRESA')) %}<a href=\"#\" onclick=\"if (confirm('¿Está seguro de borrar este servicio?')) document.getElementById('{{ frmNombreDelete }}').submit();\"><i class=\"material-icons\">delete</i></a>{% endif %}",
+                        },
+                        {% endfor %}
+                        {% endif %}
+                    ];
+
+
+                    $("#jsGrid").jsGrid({
+                                width: "100%",
+                                height: "auto",
+
+                                inserting: false,
+                                editing: false,
+                                sorting: true,
+                                paging: true,
+
+                                pageIndex: 1,
+                                pageSize: 20,
+
+                                filtering: true,
+                                clearFilterButton: true,
+
+                                data: productos,
+
+                                pagePrevText: "<",
+                                pageNextText: ">",
+                                pageFirstText: "Primera",
+                                pageLastText: "Última",
+                                pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                                noDataContent: "No se encontraron registros",
+
+                                fields: [
+                                    { name: "Id", type: "number", width: "2em", css: "textofila", filtering:false },
+                                    { name: "Nombre", type: "text", width: "8em", css: "textofila"},
+                                    { name: "Precio", title: "Precio", type: "text", width: "4em", css: "textofila", filtering:false},
+                                    { name: "Operaciones", type: "html", width: "4em", width: "4em", css: "textofila"},
+                                ],
+
+                                controller: {
+                                    data: productos,
+                                    loadData: function (filter) {
+
+                                        var registros = this.data;
+
+                                        if (filter.Nombre != null) {
+                                            registros = $.grep(registros, function (item) {
+                                                return (item.Nombre.toUpperCase().indexOf(filter.Nombre.toUpperCase()) >= 0);
+                                            });
+                                        }
+
+                                        return registros;
+                                    }
+                                }
+                            }
+                    );
+                </script>
+
+
+                <style>
+                    .textofila
+                    {
+                        font-size:0.8em;
+                    }
+                    img
+                    {
+                        width: 10em;
+                        height: auto;
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+{% endblock %}

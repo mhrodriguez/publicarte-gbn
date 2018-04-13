@@ -1,0 +1,11 @@
+{% if is_granted('ROLE_EMPRESA') %}
+    {% include "menu/empresa.html.twig" %}
+{% endif %}
+
+{% if is_granted('ROLE_VENDEDOR') %}
+    {% include "menu/vendedor.html.twig" %}
+{% endif %}
+
+{% if is_granted('ROLE_COBRANZA') %}
+    {% include "menu/cobranza.html.twig" %}
+{% endif %}

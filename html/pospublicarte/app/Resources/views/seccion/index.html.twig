@@ -1,0 +1,63 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <h3>Secciones</h3>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('seccion_new', {'idSucursal' : sucursal.id }) }}'">
+                Nueva
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Nombre</th>
+                    <th class="mdl-data-table__cell--non-numeric">Activo</th>
+                    <th class="mdl-data-table__cell--non-numeric">Operaciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for seccion in sucursal.secciones %}
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">{{ seccion.nombre }}</td>
+                        <td class="mdl-data-table__cell--non-numeric">{% if seccion.activo %}Si{% else %}No{% endif %}</td>
+                        <td>
+                            <a href="{{ path('seccion_edit', { 'id': seccion.id, 'idSucursal' : sucursal.id }) }}"><i class="material-icons">edit</i></a>
+                            <a href="{{ path('mesa_index', {'idSeccion' : seccion.id  }) }}?backurl={{ path('seccion_index', {'idSucursal' : sucursal.id  }) }}"><i class="material-icons">view_module</i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <a href="{{ path('sucursal_index') }}">Volver a sucursales</a>
+        </div>
+    </div>
+
+
+{% endblock %}

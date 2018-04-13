@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ventum</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ ventum.id }}</td>
+            </tr>
+            <tr>
+                <th>Subtotal</th>
+                <td>{{ ventum.subtotal }}</td>
+            </tr>
+            <tr>
+                <th>Iva</th>
+                <td>{{ ventum.iva }}</td>
+            </tr>
+            <tr>
+                <th>Total</th>
+                <td>{{ ventum.total }}</td>
+            </tr>
+            <tr>
+                <th>Propina</th>
+                <td>{{ ventum.propina }}</td>
+            </tr>
+            <tr>
+                <th>Ticket</th>
+                <td>{{ ventum.ticket }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if ventum.fecha %}{{ ventum.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Activo</th>
+                <td>{% if ventum.activo %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Facturada</th>
+                <td>{% if ventum.facturada %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('venta_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('venta_edit', { 'id': ventum.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

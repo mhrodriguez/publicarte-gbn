@@ -1,0 +1,251 @@
+<body onload="window.print();">
+<table>
+    <tr>
+        <td style="width:20%;">
+            {% image '@FrameworkBundle/Resources/public/images/img_logo.png' %}
+            <img src="{{ asset_url }}" style="height:80px;"/>
+            {% endimage %}
+        </td>
+        <td style="width:50%;text-align: center">
+            <h2>Orden de Trabajo
+            {% if orden.tipo %}
+                <br>{{ orden.tipo.nombre }}
+            {% endif %}
+            </h2>
+            <h3>Estado: {{ orden.estado.nombre }}</h3>
+        </td>
+        <td style="width:30%;">
+            <table>
+                <tr class="header">
+                    <td>Folio:</td>
+                    <td>Folio de Cotización:</td>
+                </tr>
+                <tr>
+                    <td colspan>{{ orden.id }}</td>
+                    <td colspan>{% if (orden.cotizacion) %}{{ orden.cotizacion.id }}{% endif %}</td>
+                </tr>
+                <tr class="header">
+                    <td>Agente de Ventas:</td>
+
+                    <td>
+                    {% if (orden.tipo and (orden.tipo.id == 2 or orden.tipo.id == 4)) %}
+                    Máquina:
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ orden.usuario.nombre }} {{ orden.usuario.apellidos }}</td>
+
+                    <td>
+                    {% if (orden.tipo and (orden.tipo.id == 2 or orden.tipo.id == 4)) %}
+                        {{ orden.maquina.nombre  }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr class="header">
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Fecha:</td>
+                    <td>Fecha de Entrega</td>
+                </tr>
+                <tr class="header">
+                    <td>{{ orden.fecha | date('d/m/Y') }}</td>
+                    <td>{{ orden.fechaentrega | date('d/m/Y') }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br>
+<table>
+    <tr class="header">
+        {% if (orden.cliente) %}
+            <td style="width:50%;">Cliente: {{ orden.cliente.razonsocial }}</td>
+        {% endif %}
+        {% if (orden.contacto) %}
+            <td style="width:50%;">Contacto: {{ orden.contacto.nombre }} {{ orden.contacto.apellidos }}</td>
+        {% endif %}
+    </tr>
+    {% if (orden.cliente) %}
+    <tr>
+        <td>RFC: {{ orden.cliente.rfc }}</td>
+        {% if (orden.contacto) %}
+        <td>E-mail: {{ orden.contacto.correo }} / E-mail facturación: {{ orden.contacto.correofacturacion }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td>Dirección: {{ orden.cliente.domicilios[0].calle }} {{ orden.cliente.domicilios[0].numext }} {{ orden.cliente.domicilios[0].numint }} Col. {{ orden.cliente.domicilios[0].colonia }}, {{ orden.cliente.domicilios[0].municipio }}, {{ orden.cliente.domicilios[0].estado.nombre }}, C.P. {{ orden.cliente.domicilios[0].cp }}</td>
+        {% if (orden.contacto) %}
+        <td>Tel: {{ orden.contacto.telefono }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+
+    </tr>
+    {% endif %}
+</table>
+<br>
+<table>
+    <tr class="header">
+            <td>Método de Pago</td>
+            <td>Forma de Pago</td>
+            <td>Uso del CFDI</td>
+    </tr>
+    <tr>
+        <td colspan>{% if orden.metodopago %} {{ orden.metodopago.nombre }} {% endif %}</td>
+        <td colspan>{% if orden.mediopago %} {{ orden.mediopago.nombre }} {% endif %}</td>
+        <td colspan>{% if orden.usocfdi %} {{ orden.usocfdi.nombre }} {% endif %}</td>
+    </tr>
+</table>
+<br>
+<table>
+    <tr class="header">
+        <td class="separador" style="width:10%">No.</td>
+        <td class="separador" style="width:15%">Servicio</td>
+        <td class="separador" style="width:20%">Descripción</td>
+        <td class="separador" style="width:15%">Código</td>
+        <td class="separador" style="width:15%">Tinta</td>
+        <td class="separador" style="width:5%">Cantidad</td>
+
+        {% if conprecios %}
+        <td class="separador numero" style="width:10%">Precio Unitario</td>
+        <td class="separador numero" style="width:10%">Importe</td>
+        {% endif %}
+    </tr>
+    {% set no = 1 %}
+    {% for item in orden.items %}
+        <tr>
+            <td>{{ no }}</td>
+            <td>{% if (item.producto) %} {{ item.producto.nombre }} {% endif %}</td>
+            <td> {{ item.descripcion | nl2br }}</td>
+            <td> {{ item.codigo | nl2br }}</td>
+            <td> {{ item.tinta | nl2br }}</td>
+            <td>{{ item.cantidad }}</td>
+
+            {% if conprecios %}
+            <td class="numero">$ {{ item.precio | number_format(2, '.', ',') }}</td>
+            <td class="numero">$ {{ (item.cantidad * item.precio) | number_format(2, '.', ',') }}</td>
+            {% endif %}
+        </tr>
+        {% set no = no + 1 %}
+    {% endfor %}
+</table>
+
+{% if conprecios %}
+<table>
+    <tr class="header">
+        <td style="width: 80%"></td>
+        <td style="width: 10%" class="numero">Subtotal</td>
+        <td style="width: 10%" class="numero">$ {{ orden.subtotal | number_format(2, '.', ',') }}</td>
+    </tr>
+    <tr class="header">
+        <td class="separador"></td>
+        <td class="separador numero" style="width: 10%">IVA</td>
+        <td class="separador numero" style="width: 10%">$ {{ orden.iva | number_format(2, '.', ',') }}</td>
+    </tr>
+    <tr class="header">
+        <td class="separador"></td>
+        <td class="separador numero" style="width: 10%">Total</td>
+        <td class="separador numero" style="width: 10%">$ {{ orden.total | number_format(2, '.', ',') }}</td>
+    </tr>
+</table>
+{% endif %}
+
+<h4>Acabado del trabajo</h4>
+
+<table>
+    <tr class="header">
+        <td style="width: 25%">
+            <label>Block:</label>
+            <p>{{ orden.block }}</p><br>
+        </td>
+        <td style="width: 25%">
+            <label>Papel:</label>
+            <p>{{ orden.papel }}</p><br>
+        </td>
+        <td style="width: 25%">
+            <label>Medida de impresión:</label>
+            <p>{{ orden.medidaimpresion }}</p><br>
+        </td>
+        <td style="width: 25%">
+            <label>Folio:</label>
+            <p>{{ orden.folio }}</p><br>
+        </td>
+    </tr>
+
+    <tr class="header">
+        <td colspan="4">
+            <label>Observaciones:</label>
+            <p>{{ orden.observaciones }}</p><br>
+        </td>
+    </tr>
+    <tr class="header">
+        <td>
+            <label>Opciones de Impresión:</label>
+            <p>
+            {% for opcion in orden.impresionopciones %}
+                - {{ opcion.nombre }}
+                <br>
+            {% endfor %}
+            </p>
+        </td>
+        <td colspan="3">
+            <label>Color Inicial:</label>
+            <p>
+                {{ orden.colorinicial }}
+            </p>
+            <label>Color Intermedio:</label>
+            <p>
+                {{ orden.colorcfb }}
+            </p>
+            <label>Color Final:</label>
+            <p>
+                {{ orden.colorcf }}
+            </p>
+        </td>
+    </tr>
+
+</table>
+
+
+<style>
+    body
+    {
+        margin: 20px;
+    }
+
+    table
+    {
+        width:100%;
+        border-spacing: 0px;
+    }
+    tr
+    {
+        width:100%;
+    }
+    .header {
+        background-color: #EEEEEE;
+    }
+    .separador
+    {
+        border-bottom:1px solid black;
+    }
+    p
+    {
+        text-align: match-parent;
+    }
+    td
+    {
+        font-size: 11px;
+    }
+    .numero
+    {
+        text-align: right;
+    }
+    label
+    {
+        font-weight: bold;
+    }
+</style>
+</body>

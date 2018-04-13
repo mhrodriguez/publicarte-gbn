@@ -1,0 +1,237 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <script>
+                var items = [
+                    {% for item in cotizacion.items %}
+                    {
+                        "Estado": "",
+                        "Id":{{ item.id }},
+                        "IdProducto":{% if item.producto %}{{ item.producto.id }}{% else %}0{% endif %},
+                        "Concepto":"{{ item.descripcion | replace({"\n": " "}) }}",
+                        "Cantidad":{{ item.cantidad }},
+                        "Precio":{{ item.precio }},
+                        "Subtotal":{{ item.cantidad * item.precio }}
+                    },
+                    {% endfor %}
+                ];
+
+                var itemsaux = [];
+
+                $(function() {
+
+                    var formSubmitHandler = $.noop;
+
+                    var showDetailsDialog = function(operacion, concepto) {
+
+                        if (operacion === "Add")
+                        {
+                            $("#txtPrecio").val( $('#selProducto').find(":selected").attr('pu') );
+                            $("#selProducto" ).prop( "disabled", false );
+                            $("#selProducto" ).val(0);
+                        }
+                        else
+                        {
+                            $("#selProducto").prop( "disabled", true );
+                            $("#selProducto" ).val(concepto.IdProducto);
+                        }
+
+                        $("#txtConcepto").val(concepto.Concepto);
+                        $("#txtPrecio").val( concepto.Precio );
+                        $("#txtCantidad").val(concepto.Cantidad);
+
+                        formSubmitHandler = function() {
+                            saveConcepto(concepto, operacion === "Add");
+                        };
+
+                        $( "#detailsDialog" ).dialog("open");
+                    };
+
+                    var saveConcepto = function(concepto, isNew) {
+
+                        var cantidad = parseInt($("#txtCantidad").val(), 10)
+                        var precio = parseFloat($("#txtPrecio").val());
+                        var estado = "N";
+
+                        if (!isNew)
+                        {
+                            estado = "A";
+                        }
+
+                        $.extend(concepto, {
+                            Estado: estado,
+                            IdProducto: parseInt($("#selProducto").val()),
+                            Concepto: $("#txtConcepto").val(),
+                            Cantidad: cantidad,
+                            Precio: precio,
+                            Subtotal: cantidad*precio
+                        });
+
+                        $("#jsGrid").jsGrid(isNew ? "insertItem" : "updateItem", concepto);
+
+                        calcularTotales();
+                    };
+
+                    $("#jsGrid").jsGrid({
+                        height: "auto",
+                        width: "100%",
+                        editing: false,
+                        autoload: true,
+                        paging: true,
+                        noDataContent: "",
+                        controller: items,
+                        data: items,
+                        rowClick: function(args) {
+                            showDetailsDialog("Edit", args.item);
+                        },
+                        fields: [
+
+                            { name: "IdProducto", title: "Servicio", type: "select", width: "9em", css: "textofila",
+                                items: [
+                                    {% for producto in productos %}
+                                    {
+                                        "Id": {{ producto.id }},
+                                        "Nombre": "{{ producto.nombre }}"
+                                    },
+                                    {% endfor %}
+                                ],
+                                valueField: "Id",
+                                textField: "Nombre"
+                            },
+                            { name: "Concepto", title: "Descripción", type: "text", width: "9em", css: "textofila" },
+                            { name: "Precio", type: "number", width: "4em", css: "textofila", itemTemplate: function(value) {
+                                return "$ " + value.toFixed(2); } },
+                            { name: "Cantidad", type: "number", width: "3em", css: "textofila" },
+                            { name: "Subtotal", type: "number", width: "6em", css: "textofila", itemTemplate: function(value) {
+                                return "$ " + value.toFixed(2); } },
+                        ]
+                    });
+                    calcularTotales();
+
+                    $("#detailsDialog").dialog({
+                        autoOpen: false,
+                        width: 400,
+                        close: function() {
+                        },
+                        buttons: {
+                            "Guardar": addConcepto,
+                            "Cancelar": function() {
+                                $("#detailsDialog").dialog( "close" );
+                            }
+                        }
+                    });
+
+                    function validarForm()
+                    {
+                        if (!checkRegexp($("#txtCantidad"), /^[1-9][0-9]*$/i ))
+                        {
+                            alert("Cantidad inválida");
+                            return false;
+                        }
+
+                        var precio = $("#txtPrecio").val();
+                        if  (precio.charAt(0) == '.') { $("#txtPrecio").val("0" + precio); }
+                        if (!checkRegexp($("#txtPrecio"), /^(\d+)(\.\d{1,2})?$/i ))
+                        {
+                            alert("Precio inválido");
+                            return false;
+                        }
+
+                        if (!checkRegexp($("#txtConcepto"), /^\w+/i) && $("#selProducto").val() == 0)
+                        {
+                            alert("Seleccione un servicio o escriba su descripción.");
+                            return false;
+                        }
+
+                        return true;
+                    }
+
+                    function addConcepto() {
+                        var valid = validarForm();
+                        if ( valid ) {
+                            formSubmitHandler();
+                            $("#detailsDialog").dialog( "close" );
+                        }
+                        return valid;
+                    }
+
+                    function checkRegexp(o, regexp, n) {
+                        if ( !( regexp.test( o.val() ) ) ) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+
+                    function calcularTotales()
+                    {
+                        var subtotal=0, iva=0, total=0;
+                        var data = $("#jsGrid").jsGrid("option", "data");
+
+                        for (var i = 0, len = data.length; i < len; i++) {
+                            subtotal += data[i].Subtotal;
+                        }
+                        iva = subtotal*0.16;
+                        total = subtotal + iva;
+
+                        $("#lblSubtotal").html(" $ " + subtotal.toFixed(2));
+
+                        $("#lblIVA").html("  $ " + iva.toFixed(2));
+                        $("#lblTotal").html("$ " + total.toFixed(2));
+                    }
+                });
+
+            </script>
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--9-col">
+        </div>
+        <div class="mdl-cell mdl-cell--1-col">
+            <b><label>Subtotal</label></b><br>
+            <b><label>IVA</label></b><br>
+            <b><label>Total</label></b>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col">
+            <label id="lblSubtotal">$ 0.00</label><br>
+            <label id="lblIVA">$ 0.00</label><br>
+            <label id="lblTotal">$ 0.00</label>
+        </div>
+    </div>
+
+    <script>
+
+    </script>
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+{% endblock %}
+
+
+

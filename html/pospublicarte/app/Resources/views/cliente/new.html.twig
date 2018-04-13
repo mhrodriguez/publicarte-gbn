@@ -1,0 +1,117 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            <h4>Generales</h4>
+
+            {{ form_start(form, {'attr': {'onsubmit': 'datasubmit(); mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.razonsocial) }}
+                        {{ form_label(form.razonsocial) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.rfc) }}
+                        {{ form_label(form.rfc) }}
+                    </div>
+                    {{ form_errors(form.rfc) }}
+                </div>
+            </div>
+
+            <h4>Dirección</h4>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.calle) }}
+                        {{ form_label(form.calle) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--2-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.numext) }}
+                        {{ form_label(form.numext) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--2-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.numint) }}
+                        {{ form_label(form.numint) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.colonia) }}
+                        {{ form_label(form.colonia) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--3-col">
+                    <label class="mdl-label">
+                        {{ form.estado.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(form.estado) }}
+                    </div>
+                    {{ form_errors(form.estado) }}
+                </div>
+
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.municipio) }}
+                        {{ form_label(form.municipio) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.localidad) }}
+                        {{ form_label(form.localidad) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(form.cp) }}
+                        {{ form_label(form.cp) }}
+                    </div>
+                    {{ form_errors(form.cp) }}
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--1-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('cliente_index') }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+            {{ form_end(form) }}
+
+            <div>
+                {{ form_errors(form) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+    </script>
+
+    <script>
+        function datasubmit()
+        {
+        }
+    </script>
+{% endblock %}

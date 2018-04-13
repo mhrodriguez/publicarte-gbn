@@ -1,0 +1,200 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--3-col">
+            <label class="mdl-label">Desde</label>
+            <i class="material-icons" style="vertical-align: middle;">insert_invitation</i>
+            <input type="text" id="inpFechaInicio" value="{{ fechaIniciostr }}" onchange="fechaInicioCambio();" />
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <label class="mdl-label">Hasta</label>
+            <i class="material-icons" style="vertical-align: middle;">insert_invitation</i>
+            <input type="text" id="inpFechaFin" value="{{ fechaFinstr }}" onchange="fechaFinCambio();"/>
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+            <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="window.location.href = '{{ path('venta_comparativoanualgrf') }}'">Comparativo anual</button>
+        </div>
+        <div class="mdl-cell mdl-cell--2-col">
+            <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="window.location.href = '{{ path('venta_indexgrf') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();">Vista de grafica</button>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <script>
+                var items = [
+                    {% for venta in ventas %}
+
+                    {% set iva = venta.iva / venta.subtotal  %}
+
+                        {% for ventaitem in venta.items %}
+
+                        {
+                        "Fecha": "{{ ventaitem.fecha|date('Y-m-d H:i:s') }}",
+                        "Sucursal": {{ venta.sucursal.id }},
+                        "Producto": "{{ ventaitem.descripcion }}",
+                        "Cantidad": "{{ ventaitem.cantidad }}",
+                        "PrecioUnitario": "{{ ventaitem.moneda.simbolo }} {{ ventaitem.precio |number_format(2, '.', ',') }}",
+                        "Subtotal": "{{ ventaitem.moneda.simbolo }} {{ (ventaitem.precio * ventaitem.cantidad) | number_format(2, '.', ',') }}",
+                        "IVA": "{{ ventaitem.moneda.simbolo }} {{ ((ventaitem.precio * ventaitem.cantidad) * iva) |number_format(2, '.', ',') }}",
+                        "Total": "{{ ventaitem.moneda.simbolo }} {{ (ventaitem.total + ((ventaitem.precio * ventaitem.cantidad) * iva)) |number_format(2, '.', ',') }}"
+                         },
+
+                        {% endfor %}
+
+                    {% for ventaitempaquete in venta.itempaquetes %}
+
+                    {
+                        "Fecha": "{{ ventaitempaquete.fecha|date('Y-m-d H:i:s') }}",
+                        "Sucursal": {{ venta.sucursal.id }},
+                        "Producto": "{{ ventaitempaquete.descripcion }}",
+                        "Cantidad": "{{ ventaitempaquete.cantidad }}",
+                        "PrecioUnitario": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.precio|number_format(2, '.', ',')) }}",
+                        "Subtotal": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.total|number_format(2, '.', ',')) }}",
+                        "IVA": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.total * iva)|number_format(2, '.', ',') }}",
+                        "Total": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.total + ((ventaitempaquete.total) * iva))|number_format(2, '.', ',') }}"
+                    },
+
+                    {% endfor %}
+                    {% endfor %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            pageIndex: 1,
+
+                            filtering: true,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            pagePrevText: "<",
+                            pageNextText: ">",
+                            pageFirstText: "Primera",
+                            pageLastText: "Última",
+                            pagerFormat: "Páginas: {first} {prev} {pages} {next} {last}    {pageIndex} de {pageCount}",
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Fecha", title: "Fecha", type: "text", width: "6em", css: "textofila", filtering:false },
+                                { name: "Sucursal", title: "Sucursal", type: "select", width: "8em", css: "textofila",
+                                    items: [
+                                        { "Id": -1, Nombre: "Todas" },
+                                        {% for sucursal in sucursales %}
+                                        {
+                                            "Id": {{ sucursal.id }},
+                                            "Nombre": "{{ sucursal.nombre }}"
+                                        },
+                                        {% endfor %}
+                                    ],
+                                    valueField: "Id",
+                                    textField: "Nombre"
+                                },
+                                { name: "Producto",title: "Producto", type: "text", width: "18em", css: "textofila"},
+                                { name: "Cantidad", title: "Cantidad", type: "number", width: "3em", css: "textofila", filtering:false },
+                                { name: "PrecioUnitario", title: "Precio Unitario", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Subtotal", title: "Subtotal", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "IVA", title: "IVA", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Total", title: "Total", type: "number", width: "4em", css: "textofila", filtering:false },
+                            ],
+
+                            controller: {
+                                data: items,
+                                loadData: function (filter) {
+
+                                    var registros = this.data;
+
+                                    if (filter.Sucursal != null) {
+
+                                        registros = $.grep(registros, function (item) {
+                                            if (filter.Sucursal>0) {
+
+                                                return (item.Sucursal == filter.Sucursal);
+
+                                            }
+                                            else
+                                            {
+                                                return true;
+                                            }
+                                        });
+                                    }
+
+                                    if (filter.Producto != null) {
+                                        registros = $.grep(registros, function (item) {
+                                            return (item.Producto.toUpperCase().indexOf(filter.Producto.toUpperCase()) >= 0);
+                                        });
+                                    }
+
+                                    return registros;
+                                }
+                            }
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <script>
+        $( function() {
+            prepararCalendario($( "#inpFechaInicio" ));
+            prepararCalendario($( "#inpFechaFin" ));
+        } );
+
+        function prepararCalendario(control)
+        {
+            control.datepicker({
+                        dateFormat: "dd-mm-yy",
+                        monthNames: [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ]
+                    }
+            );
+        }
+
+        function fechaInicioCambio()
+        {
+            mostrarProgreso(true);
+            window.location.href = '{{ path('venta_index') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();
+        }
+
+        function fechaFinCambio()
+        {
+            mostrarProgreso(true);
+            window.location.href = '{{ path('venta_index') }}?fechaInicio=' + $('#inpFechaInicio').val() + '&fechaFin=' + $('#inpFechaFin').val();
+        }
+    </script>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+<div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+        <span class="mdl-layout-title">Nuevo Servicio</span>
+
+    {{ form_start(form, {'attr': {'onsubmit': 'datasubmit(); mostrarProgreso(true); return true;'}} ) }}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--4-col">
+           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                {{ form_widget(form.nombre) }}
+                {{ form_label(form.nombre) }}
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                {{ form_widget(form.precio, {'attr': {'pattern': '[0-9]*(\.[0-9]+)?'}}) }}
+                {{ form_label(form.precio) }}
+                <span class="mdl-textfield__error">Precio debe ser numérico</span>
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--4-col">
+            <label id="lblMonedaNombre" class="mdl-label">
+                {{ form.moneda.vars.label }}
+            </label>
+            <div class="select-style">
+                {{ form_widget(form.moneda) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col">
+            <a href="{{ path('producto_index') }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+
+    <div>
+        {{ form_errors(form.nombre) }}
+        {{ form_errors(form.precio) }}
+        {{ form_errors(form.moneda) }}
+    </div>
+
+    </div>
+</div>
+
+<script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+
+        $('#appbundle_producto_precio').val("0.0");
+
+
+</script>
+
+<script>
+        function datasubmit()
+        {
+        }
+</script>
+
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+
+            <span class="mdl-layout-title">Nuevo</span>
+
+            {{ form_start(form, {'attr': {'onsubmit': 'mostrarProgreso(true); return true;'}}   ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    {{ form_widget(form.nombre) }}
+                    {{ form_label(form.nombre) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                    {{ form_widget(form.apellidos) }}
+                    {{ form_label(form.apellidos) }}
+                    </div>
+               </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(form.username) }}
+                        {{ form_label(form.username) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(form.email) }}
+                        {{ form_label(form.email) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(form.password.first) }}
+                        {{ form_label(form.password.first) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(form.password.second) }}
+                        {{ form_label(form.password.second) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label id="lblSucursales" class="mdl-label">
+                        {{ form.sucursales.vars.label }}
+                    </label>
+                    <div>
+                    {{ form_widget(form.sucursales) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <label id="lblRoles" class="mdl-label">
+                        {{ form.roles2.vars.label }}
+                    </label>
+                    <div>
+                        {{ form_widget(form.roles2) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <label id="lblFirma" class="mdl-label">
+                        {{ form.firmaimagen.vars.label }}
+                    </label>
+                    <div>
+                        {{ form_widget(form.firmaimagen) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--1-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Crear</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('usuario_index', {}) }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+
+            <div>
+            {{ form_errors(form.nombre) }}
+            {{ form_errors(form.apellidos) }}
+            {{ form_errors(form.username) }}
+            {{ form_errors(form.email) }}
+            {{ form_errors(form.sucursales) }}
+            {{ form_errors(form.roles2) }}
+            {{ form_errors(form.password.first) }}
+            {{ form_errors(form.password.second) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form label').addClass('mdl-textfield__label')
+
+        document.getElementById('usuario_email').required=false;
+
+        $('#usuario_sucursales input').removeClass('mdl-textfield__input');
+        $('#usuario_sucursales label').removeClass('mdl-textfield__label');
+        $('#usuario_sucursales input').prop('checked', true);
+
+        $('#usuario_roles2 input').removeClass('mdl-textfield__input');
+        $('#usuario_roles2 label').removeClass('mdl-textfield__label');
+
+        $('#lblSucursales').removeClass('mdl-textfield__label');
+        $('#lblRoles').removeClass('mdl-textfield__label');
+        $('#lblFirma').removeClass('mdl-textfield__label');
+
+    </script>
+
+    <style>
+
+    </style>
+
+{% endblock %}

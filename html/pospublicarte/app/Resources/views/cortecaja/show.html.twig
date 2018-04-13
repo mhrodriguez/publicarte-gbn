@@ -1,0 +1,365 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    {% set iva=0 %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--9-col">
+            <h4>Resumen</h4>
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+            <a target="_blank" href="{{ path('cortecaja_show', {'id': cortecaja.id, '_format':'xls'}) }}" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Exportar a Excel</a>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp mdl-cell--12-col">
+                <thead>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Fecha</label>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        {{ cortecaja.fecha|date('d-m-Y H:i:s') }}
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Ventas en Efectivo</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.totalefectivo | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Sucursal</label>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        {{ cortecaja.sucursal.nombre }}
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Ventas con Tarjeta</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.totaltarjetacredito | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Usuario</label>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        {{ cortecaja.usuario.nombre }}{% if cortecaja.usuario.apellidos is not null %} {{ cortecaja.usuario.apellidos }}{% endif %}
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Propinas en Efectivo</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.propinasefectivo | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Periodo</label>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        {{ cortecaja.fechainicio|date('d-m-Y H:i') }} a {{ cortecaja.fechafin|date('d-m-Y H:i') }}
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Propinas con Tarjeta de Crédito</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.propinastarjetacredito | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+
+                    </td>
+                    <td>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Total de Ventas</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ (cortecaja.totaltarjetacredito+cortecaja.totalefectivo+cortecaja.propinasefectivo+cortecaja.propinastarjetacredito) | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+
+                    </td>
+                    <td>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Ventas en Efectivo Reportadas</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.totalefectivoreportado | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+
+                    </td>
+                    <td>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Ventas con Tarjeta Reportadas</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.totaltarjetacreditoreportado | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">
+                    </td>
+                    <td>
+                    </td>
+                    <td class="mdl-data-table__cell--non-numeric">
+                        <label class="lbl-titulo">Remanente</label>
+                    </td>
+                    <td>
+                        {{ cortecaja.moneda.simbolo }} {{ cortecaja.remanente | number_format(2, '.', ',') }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <h4>Ventas</h4>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid"></div>
+            <script>
+                var items = [
+                    {% for venta in ventas %}
+
+                    {
+                        "Fecha": "<b>{{ venta.fecha|date('Y-m-d H:i:s') }}</b>",
+                        "Producto": "<b>Venta {{ venta.id }}</b>",
+                        "FormaPago": "<b>{{ venta.mediopago.nombre }}</b>"
+                    },
+
+                    {% set iva = venta.iva / venta.subtotal  %}
+
+                    {% for ventaitem in venta.items %}
+                    {
+                        "Producto": "{{ ventaitem.descripcion }}",
+                        "Cantidad": "{{ ventaitem.cantidad }}",
+                        "PrecioUnitario": "{{ ventaitem.moneda.simbolo }} {{ ventaitem.precio |number_format(2, '.', ',') }}",
+                        "Subtotal": "{{ ventaitem.moneda.simbolo }} {{ (ventaitem.precio * ventaitem.cantidad) | number_format(2, '.', ',') }}",
+                        "IVA": "{{ ventaitem.moneda.simbolo }} {{ ((ventaitem.precio * ventaitem.cantidad) * iva) |number_format(2, '.', ',') }}",
+                        "Total": "{{ ventaitem.moneda.simbolo }} {{ (ventaitem.total + ((ventaitem.precio * ventaitem.cantidad) * iva)) |number_format(2, '.', ',') }}"
+                    },
+
+                    {% endfor %}
+
+                    {% for ventaitempaquete in venta.itempaquetes %}
+                    {
+                        "Producto": "{{ ventaitempaquete.descripcion }}",
+                        "Cantidad": "{{ ventaitempaquete.cantidad }}",
+                        "PrecioUnitario": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.precio|number_format(2, '.', ',')) }}",
+                        "Subtotal": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.total|number_format(2, '.', ',')) }}",
+                        "IVA": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.total * iva)|number_format(2, '.', ',') }}",
+                        "Total": "{{ ventaitempaquete.moneda.simbolo }} {{ (ventaitempaquete.total + ((ventaitempaquete.total) * iva))|number_format(2, '.', ',') }}"
+                    },
+                    {% endfor %}
+
+                    {
+                        "Subtotal": "<b>{{ venta.moneda.simbolo }} {{ venta.subtotal | number_format(2, '.', ',') }}</b>",
+                        "IVA": "<b>{{ ventaitem.moneda.simbolo }} {{ venta.iva |number_format(2, '.', ',') }}</b>",
+                        "Total": "<b>{{ ventaitem.moneda.simbolo }} {{ venta.total |number_format(2, '.', ',') }}</b>"
+                    },
+
+                    {% endfor %}
+                ];
+
+                $("#jsGrid").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            pageIndex: 1,
+
+                            filtering: false,
+                            clearFilterButton: true,
+
+                            data: items,
+
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Fecha", title: "Fecha", type: "text", width: "6em", css: "textofila", filtering:false },
+                                { name: "Producto",title: "Producto", type: "text", width: "18em", css: "textofila", filtering:false},
+                                { name: "FormaPago",title: "Forma de pago", type: "text", width: "6em", css: "textofila", filtering:false},
+                                { name: "Cantidad", title: "Cantidad", type: "number", width: "3em", css: "textofila", filtering:false },
+                                { name: "PrecioUnitario", title: "Precio Unitario", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Subtotal", title: "Subtotal", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "IVA", title: "IVA", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Total", title: "Total", type: "number", width: "4em", css: "textofila", filtering:false },
+                            ],
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+        <h4>Productos vendidos</h4>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid2"></div>
+            <script>
+                var items2 = [
+                    {% for ventaitem in ventagrupo.items %}
+                    {
+                        "Cantidad": "{{ ventaitem.cantidad }}",
+                        "Producto": "{{ ventaitem.descripcion }}",
+                        "PrecioUnitario": "{{ ventaitem.moneda.simbolo }} {{ ventaitem.precio |number_format(2, '.', ',') }}",
+                        "Subtotal": "{{ ventaitem.moneda.simbolo }} {{ ventaitem.total | number_format(2, '.', ',') }}",
+                        "IVA": "{{ ventaitem.moneda.simbolo }} {{ (ventaitem.total * iva) |number_format(2, '.', ',') }}",
+                        "Total": "{{ ventaitem.moneda.simbolo }} {{ (ventaitem.total + (ventaitem.total * iva))|number_format(2, '.', ',') }}"
+                    },
+                    {% endfor %}
+                ];
+
+                $("#jsGrid2").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            pageIndex: 1,
+
+                            filtering: false,
+                            clearFilterButton: true,
+
+                            data: items2,
+
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Producto",title: "Producto", type: "text", width: "18em", css: "textofila", filtering:false},
+                                { name: "Cantidad", title: "Cantidad", type: "number", width: "3em", css: "textofila", filtering:false },
+                                { name: "PrecioUnitario", title: "Precio Unitario", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Subtotal", title: "Subtotal", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "IVA", title: "IVA", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Total", title: "Total", type: "number", width: "4em", css: "textofila", filtering:false },
+                            ],
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+        <h4>Paquetes vendidos</h4>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="jsGrid3"></div>
+            <script>
+                var items3 = [
+                    {% for ventaitempaquete in ventagrupo.itempaquetes %}
+                    {
+                        "Cantidad": "{{ ventaitempaquete.cantidad }}",
+                        "Producto": "{{ ventaitempaquete.descripcion }}",
+                        "Subtotal": "{{ ventaitem.moneda.simbolo }} {{ ventaitempaquete.total | number_format(2, '.', ',') }}",
+                        "IVA": "{{ ventaitem.moneda.simbolo }} {{ (ventaitempaquete.total * iva) |number_format(2, '.', ',') }}",
+                        "Total": "{{ ventaitem.moneda.simbolo }} {{ (ventaitempaquete.total + (ventaitempaquete.total * iva))|number_format(2, '.', ',') }}"
+                    },
+                    {% endfor %}
+                ];
+
+                $("#jsGrid3").jsGrid({
+                            width: "100%",
+                            height: "auto",
+
+                            inserting: false,
+                            editing: false,
+                            sorting: true,
+                            paging: false,
+
+                            pageIndex: 1,
+
+                            filtering: false,
+                            clearFilterButton: true,
+
+                            data: items3,
+
+                            noDataContent: "No se encontraron registros",
+
+                            fields: [
+                                { name: "Producto",title: "Producto", type: "text", width: "18em", css: "textofila", filtering:false},
+                                { name: "Cantidad", title: "Cantidad", type: "number", width: "3em", css: "textofila", filtering:false },
+                                { name: "Subtotal", title: "Subtotal", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "IVA", title: "IVA", type: "number", width: "4em", css: "textofila", filtering:false },
+                                { name: "Total", title: "Total", type: "number", width: "4em", css: "textofila", filtering:false },
+                            ],
+                        }
+                );
+
+            </script>
+
+            <style>
+                .textofila
+                {
+                    font-size:0.8em;
+                }
+            </style>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <a href="{{ path('cortecaja_index') }}">Volver a Corte de caja</a>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scriptsheader %}
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    {% javascripts '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.js' %}
+    <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    {% stylesheets '@FrameworkBundle/Resources/public/jsgrid/jsgrid-theme.min.css' filter='cssrewrite' %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+{% endblock %}

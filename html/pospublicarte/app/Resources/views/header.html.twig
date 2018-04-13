@@ -1,0 +1,99 @@
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            {% image '@FrameworkBundle/Resources/public/images/img_logo.png' %}
+            <img src="{{ asset_url }}" class="header-logo" style="width:10em; height:3.5em;"/>
+            {% endimage %}
+
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation mdl-layout--large-screen-only">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+
+                    {% if is_granted('ROLE_EMPRESA') %}
+                    <a href="{{ path('panelpago_index') }}">
+                        <span id="divCount" class="mdl-badge" data-badge=""><i class="material-icons mdl-navigation__item-icon">attach_money</i></span>
+                    </a>
+                    <script>
+                        refreshCount();
+
+                        function refreshCount()
+                        {
+                            var url = "{{ path('pago_notificacion', {}) }}.json";
+
+                            $.get(url,
+                                    function(data)
+                                    {
+                                        if (data.resultado == true)
+                                        {
+                                            $('#divCount').attr("data-badge", data.count);
+                                        }
+                                    }
+                            ).fail(function()
+                            {
+
+                            });
+
+                            setTimeout(refreshCount, 10000);
+                        }
+                    </script>
+                    {% endif %}
+                    <div class="mdl-layout-spacer">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+                    <span class="mdl-layout-title">{{ app.user.empresa.nombre }}</span>
+                    <button id="btnUsuarioMenu"
+                            class="mdl-button mdl-js-button mdl-button--icon">
+                        <i class="material-icons">more_vert</i>
+                    </button>
+                    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                        for="btnUsuarioMenu">
+                        <li disabled class="mdl-menu__item">{{ app.user.nombre }} {{ app.user.apellidos }}</li>
+                        <li class="mdl-menu__item mdl-menu__item--full-bleed-divider" onclick="document.getElementById('frmPrincipal').src='{{ path('usuario_miperfil') }}'">Perfil</li>
+                        <li class="mdl-menu__item" onclick="window.location.href='{{ path("logout", {}) }}'">Salir</li>
+                    </ul>
+
+                    {% image '@FrameworkBundle/Resources/public/images/img_usuario.jpg' %}
+                    <img id="imgUsuario" class="image-usuario" src="{{ asset_url }}" alt="" class="circle responsive-img"/>
+                    {% endimage %}
+
+                {% else %}
+                <a class="mdl-navigation__link qbcustom" href="{{ path("login", {}) }}">ACCEDER</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <span class="mdl-layout-title">{{ app.user.empresa.nombre }}</span>
+        {% else %}
+            <span class="mdl-layout-title">Publicarte</span>
+        {% endif %}
+
+        <nav class="mdl-navigation">
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                <a class="mdl-navigation__link" href="{{ path('usuario_miperfil') }}">PERFIL</a>
+                <a class="mdl-navigation__link" href="{{ path("logout", {}) }}">SALIR</a>
+            {% else %}
+                <a class="mdl-navigation__link" href="{{ path("login", {}) }}">ACCEDER</a>
+            {% endif %}
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+        {% block body %}
+        <div class="page-content">{% block contenido %}{% endblock %}</div>
+        {% endblock %}
+    </main>
+    <style>
+        .image-usuario {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+        }
+    </style>
+</div>

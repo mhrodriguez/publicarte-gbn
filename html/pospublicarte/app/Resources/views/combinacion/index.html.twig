@@ -1,0 +1,72 @@
+
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <h3>Combinaciones</h3>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--1-col">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    onclick="window.location.href='{{ path('combinacion_new', {}) }}'">
+                Nueva
+            </button>
+        </div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+        <div class="mdl-cell mdl-cell--1-col"></div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Nombre</th>
+                    <th>Precio</th>
+                    <th class="mdl-data-table__cell--non-numeric">Activo</th>
+                    <th class="mdl-data-table__cell--non-numeric">Operaciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for combinacion in combinaciones %}
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">{{ combinacion.nombre }}</td>
+                        <td>{{ combinacion.moneda.simbolo }}{{ combinacion.precio }}</td>
+                        <td class="mdl-data-table__cell--non-numeric">{% if combinacion.activo %}Si{% else %}No{% endif %}</td>
+                        <td>
+                            <a href="{{ path('combinacion_edit', { 'id': combinacion.id }) }}"><i class="material-icons">edit</i></a>
+                            <a href="{{ path('combinacionitem_index', {'idCombinacion' : combinacion.id }) }}">
+                                {% if app.user.empresa.tipo.id == 2 %}
+                                    <i class="material-icons">local_dining</i>
+                                {% else %}
+                                    <i class="material-icons">local_mall</i>
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <a href="{{ path('producto_index') }}">Volver a productos</a>
+        </div>
+    </div>
+
+{% endblock %}

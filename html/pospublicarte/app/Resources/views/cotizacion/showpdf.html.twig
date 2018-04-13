@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Cotizacion</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ cotizacion.id }}</td>
+            </tr>
+            <tr>
+                <th>Subtotal</th>
+                <td>{{ cotizacion.subtotal }}</td>
+            </tr>
+            <tr>
+                <th>Iva</th>
+                <td>{{ cotizacion.iva }}</td>
+            </tr>
+            <tr>
+                <th>Total</th>
+                <td>{{ cotizacion.total }}</td>
+            </tr>
+            <tr>
+                <th>Motivocancelacion</th>
+                <td>{{ cotizacion.motivocancelacion }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if cotizacion.fecha %}{{ cotizacion.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fechavalida</th>
+                <td>{% if cotizacion.fechavalida %}{{ cotizacion.fechavalida|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fecharecepcion</th>
+                <td>{% if cotizacion.fecharecepcion %}{{ cotizacion.fecharecepcion|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Activo</th>
+                <td>{% if cotizacion.activo %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('cotizacion_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('cotizacion_edit', { 'id': cotizacion.id }) }}">Edit</a>
+        </li>
+    </ul>
+{% endblock %}

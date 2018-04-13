@@ -1,0 +1,117 @@
+<body onload="window.print();">
+<table>
+    <tr>
+        <td style="width:20%;">
+            {% image '@FrameworkBundle/Resources/public/images/img_logo.png' %}
+            <img src="{{ asset_url }}" style="height:80px;"/>
+            {% endimage %}
+        </td>
+        <td style="width:50%;text-align: center">
+            <h2>Comprobante de Pago</h2>
+        </td>
+        <td style="width:30%;">
+            <table>
+                <tr class="header">
+                    <td>Folio de Orden:</td>
+                    <td>Folio de Cotización:</td>
+                </tr>
+                <tr>
+                    <td colspan>{{ pago.orden.id }}</td>
+                    <td colspan>{% if (pago.orden.cotizacion) %}{{ pago.orden.cotizacion.id }}{% endif %}</td>
+                </tr>
+                <tr class="header">
+                    <td colspan="2">Agente:</td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ pago.usuario.nombre }} {{ pago.usuario.apellidos }}</td>
+                </tr>
+                <tr class="header">
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td>Fecha de pago:</td>
+                    <td></td>
+                </tr>
+                <tr class="header">
+                    <td>{{ pago.fechapago | date('d/m/Y') }}</td>
+                    <td></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br>
+<table>
+    <tr class="header">
+        {% if (pago.orden.cliente) %}
+            <td style="width:50%;"><b>Cliente:</b> {{ pago.orden.cliente.razonsocial }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        {% if (pago.mediopago) %}
+            <td><b>Forma de pago:</b> {{ pago.mediopago.nombre }}</td>
+        {% endif %}
+    </tr>
+</table>
+<br>
+<table>
+    <tr class="header">
+        <td class="separador" style="width:10%">Id de Pago</td>
+        <td class="separador" style="width:60%">Concepto</td>
+        <td class="separador numero" style="width:30%">Monto</td>
+    </tr>
+    <tr>
+        <td>{{ pago.id }}</td>
+        <td>{{ pago.tipo.nombre }}</td>
+        <td class="numero">MXN {{ pago.monto | number_format(2, '.', ',') }}</td>
+    </tr>
+</table>
+<br>
+<table>
+    <tr class="header">
+        <td style="width: 80%"></td>
+        <td style="width: 10%" class="numero">Saldo pendiente</td>
+        <td style="width: 10%" class="numero">$ {{ pago.orden.saldoPendiente | number_format(2, '.', ',') }}</td>
+    </tr>
+</table>
+
+<style>
+    body
+    {
+        margin: 20px;
+    }
+
+    table
+    {
+        width:100%;
+        border-spacing: 0px;
+    }
+    tr
+    {
+        width:100%;
+    }
+    .header {
+        background-color: #EEEEEE;
+    }
+    .separador
+    {
+        border-bottom:1px solid black;
+    }
+    p
+    {
+        text-align: match-parent;
+    }
+    td
+    {
+        font-size: 11px;
+    }
+    .numero
+    {
+        text-align: right;
+    }
+    label
+    {
+        font-weight: bold;
+    }
+</style>
+</body>

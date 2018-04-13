@@ -1,0 +1,77 @@
+{% extends 'baseabc.html.twig' %}
+
+{% block body %}
+
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <span class="mdl-layout-title">Editar Servicio</span>
+
+            {{ form_start(edit_form, {'attr': {'onsubmit': 'datasubmit(); mostrarProgreso(true); return true;'}} ) }}
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell--12-col">
+                        {{ form_widget(edit_form.nombre) }}
+                        {{ form_label(edit_form.nombre) }}
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        {{ form_widget(edit_form.precio, {'attr': {'pattern': '[0-9]*(\.[0-9]+)?'}}) }}
+                        {{ form_label(edit_form.precio) }}
+                        <span class="mdl-textfield__error">Precio debe ser numérico</span>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--4-col">
+                    <label id="lblMonedaNombre" class="mdl-label">
+                        {{ edit_form.moneda.vars.label }}
+                    </label>
+                    <div class="select-style">
+                        {{ form_widget(edit_form.moneda) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col">
+                    <div class="mdl-textfield mdl-js-textfield">
+                        Activo {{ form_widget(edit_form.activo) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Guardar</button>
+                </div>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a href="{{ path('producto_index') }}" class="mdl-button mdl-js-button mdl-button--raised" style="margin-left:1em">Cancelar</a>
+                </div>
+            </div>
+
+            {{ form_end(edit_form) }}
+
+            <div>
+                {{ form_errors(edit_form.nombre) }}
+                {{ form_errors(edit_form.precio) }}
+                {{ form_errors(edit_form.moneda) }}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $('form input').addClass('mdl-textfield__input')
+        $('form textarea').addClass('mdl-textfield__input')
+
+        $('.mdl-textfield label').addClass('mdl-textfield__label')
+
+    </script>
+
+    <script>
+        function datasubmit()
+        {
+        }
+    </script>
+
+{% endblock %}

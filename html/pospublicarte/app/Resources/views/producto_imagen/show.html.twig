@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Imagen</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ imagen.id }}</td>
+            </tr>
+            <tr>
+                <th>Titulo</th>
+                <td>{{ imagen.titulo }}</td>
+            </tr>
+            <tr>
+                <th>Descripcion</th>
+                <td>{{ imagen.descripcion }}</td>
+            </tr>
+            <tr>
+                <th>Url</th>
+                <td>{{ imagen.url }}</td>
+            </tr>
+            <tr>
+                <th>Nombrearchivo</th>
+                <td>{{ imagen.nombrearchivo }}</td>
+            </tr>
+            <tr>
+                <th>Activo</th>
+                <td>{% if imagen.activo %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('imagen_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('imagen_edit', { 'id': imagen.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

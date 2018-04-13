@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Publicarte{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+
+        {% stylesheets '@FrameworkBundle/Resources/public/mdl/material.min.css' filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+        {% endstylesheets %}
+        {% stylesheets '@FrameworkBundle/Resources/public/mdl/dialog-polyfill.css' filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+        {% endstylesheets %}
+
+        {% javascripts '@FrameworkBundle/Resources/public/mdl/material.min.js' %}
+        <script src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+        {% javascripts '@FrameworkBundle/Resources/public/mdl/dialog-polyfill.js' %}
+        <script src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+        {% javascripts '@FrameworkBundle/Resources/public/jquery/jquery-3.2.1.js' %}
+        <script src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+
+        <script>
+            function mostrarProgreso(mostrar) {
+                if (!mostrar)
+                {
+                    document.getElementById('pgrPrincipal').style.display='none';
+                }
+                else
+                {
+                    document.getElementById('pgrPrincipal').style.display='';
+                }
+            }
+        </script>
+
+    </head>
+    <body onload="mostrarProgreso(false);">
+        <div id="pgrPrincipal" class="mdl-progress mdl-js-progress mdl-progress--indeterminate"></div>
+        {% block header %}{% endblock %}
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+    </body>
+    <style>
+        #frmPrincipal
+        {
+            height: 82vh;
+        }
+
+        .mdl-progress
+        {
+            width: 100%;
+        }
+
+        .mdl-navigation__link.qbcustom
+        {
+            color: white !important;
+        }
+        button.mdl-button
+        {
+            color: white !important;
+        }
+    </style>
+
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Publicarte{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+
+        {% stylesheets '@FrameworkBundle/Resources/public/mdl/material.min.css' filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+        {% endstylesheets %}
+        {% stylesheets '@FrameworkBundle/Resources/public/mdl/dialog-polyfill.css' filter='cssrewrite' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+        {% endstylesheets %}
+
+        {% javascripts '@FrameworkBundle/Resources/public/mdl/material.min.js' %}
+        <script src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+        {% javascripts '@FrameworkBundle/Resources/public/mdl/dialog-polyfill.js' %}
+        <script src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+        {% javascripts '@FrameworkBundle/Resources/public/jquery/jquery-3.2.1.js' %}
+        <script src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+
+        {% block scriptsheader %}{% endblock %}
+
+    </head>
+    <body onload="mostrarProgreso(false); notificar();">
+        <div id="pgrPrincipal" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+        <div id="toaster" class="mdl-js-snackbar mdl-snackbar">
+            <div class="mdl-snackbar__text"></div>
+            <button class="mdl-snackbar__action" type="button"></button>
+        </div>
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+    </body>
+    <style>
+        .mdl-progress
+        {
+            width: 100%;
+        }
+    </style>
+    <script>
+        function mostrarProgreso(mostrar) {
+            if (!mostrar)
+            {
+                document.getElementById('pgrPrincipal').style.display='none';
+            }
+            else
+            {
+                document.getElementById('pgrPrincipal').style.display='';
+            }
+        }
+
+        function notificar() {
+            var notification = document.querySelector('.mdl-js-snackbar');
+            if (notification != null) {
+                if (notification.MaterialSnackbar != null) {
+                    {% for flash in app.session.flashbag.get('aviso') %}
+                    notification.MaterialSnackbar.showSnackbar(
+                            {
+                                message: '{{ flash }}'
+                            }
+                    );
+                    {% endfor %}
+                }
+                else {
+                    alert('error2');
+                }
+            }
+            else {
+                alert('error');
+            }
+
+            {% for flash in app.session.flashbag.get('error') %}
+            alert('{{ flash }}');
+            {% endfor %}
+
+            {% for flash in app.session.flashbag.get('alerta') %}
+            alert('{{ flash }}');
+            {% endfor %}
+
+            {% for flash in app.session.flashbag.get('accion') %}
+            {{ flash | raw }}
+            {% endfor %}
+        }
+
+    </script>
+    <style>
+        select {
+            width: 100%;
+        }
+
+        .select-style {
+            margin-top: 0.8em;
+            border: 1px solid #ccc;
+            width: 100%;
+            border-radius: 3px;
+            overflow: hidden;
+            background: #fafafa url("{% image '@FrameworkBundle/Resources/public/images/img_flechaselect.png' %}{{ asset_url }}{% endimage %}") no-repeat right top;
+        }
+        .select-style select {
+            padding: 5px 8px;
+            width: 100%;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            background-image: none;
+            -webkit-appearance: none;
+        }
+        .select-style select:focus {
+            outline: none;
+        }
+
+        .mdl-label
+        {
+            color: #aaaaaa;
+            font-size: 1.15em;
+        }
+
+        .lbl-titulo
+        {
+            font-weight: bold;
+        }
+
+        h3, h4, h5
+        {
+            color: dimgray;
+            line-height: 0.1em;
+        }
+        button.mdl-button
+        {
+            color: white !important;
+        }
+    </style>
+</html>
